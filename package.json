@@ -1,0 +1,24 @@
+{
+  "name": "fileserv",
+  "description": "",
+  "version": "1.0.0",
+  "author": "Mike Kovařík",
+  "license": "MIT",
+  "dependencies": {
+    "anchora-static-server": "latest"
+  },
+  "scripts": {
+    "run": "c:\\nwjs-sdk\\nw.exe ."
+  },
+  "main": "index.html",
+  "window": {
+    "width": 500,
+    "height": 200,
+    "show": true,
+    "resizable": true
+  },
+  "devDependencies": {
+    "@std/esm": "^0.18.0",
+    "rollup": "^0.52.0"
+  }
+}

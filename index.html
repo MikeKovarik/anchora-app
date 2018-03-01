@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" type="text/css" href="flexus/flexus-neon.css">
+	<link rel="stylesheet" type="text/css" href="flexus/flexus-neon-icons.css">
+	<link rel="stylesheet" type="text/css" href="style/style.css">
+	<title></title>
+</head>
+<body light>
+
+	<flexus-view>
+
+		<div layout small-space>
+			<div two-line flex-1>
+				<label for="port">Port</label>
+				<input type="number" id="port">
+			</div>
+			<div two-line flex-4>
+				<label for="root">Root</label>
+				<input type="text" id="root">
+			</div>
+		</div>
+
+		<div layout style="margin-top: 8px">
+			<div flex>
+				<div><input type="checkbox"><label>HTTP</label></div>
+				<div><input type="checkbox"><label>HTTPS</label></div>
+				<div><input type="checkbox"><label>HTTP/2.0</label></div>
+			</div>
+			<div flex>
+				<div><input id="autostart" type="checkbox"><label>Autostart</label></div>
+				<div><input id="cors" type="checkbox"><label>cors</label></div>
+				<div><input id="cache" type="checkbox"><label>cache</label></div>
+				<div><input id="etag" type="checkbox"><label>etag</label></div>
+				<div><input id="gzip" type="checkbox"><label>gzip</label></div>
+			</div>
+		</div>
+
+		<div layout small-space left center>
+			<div flex>Status: <span id="status"></span></div>
+			<button id="start">Start</button>
+			<button id="stop">Stop</button>
+		</div>
+
+		<pre id="log"></pre>
+<!--
+		<h3>Custom domain</h3>
+		<div layout small-space>
+			<div flex-1>Domains</div>
+			<div flex-4 for="root">Root</div>
+		</div>
+		<div layout small-space>
+			<input flex-1 type="text" id="domain" value="localhost:80" disabled>
+			<input flex-4 type="text" id="root">
+		</div>
+		<div layout small-space>
+			<input flex-1 type="text" id="domain" value="">
+			<input flex-4 type="text" id="root">
+		</div>
+-->
+	</flexus-view>
+
+	<script>
+		window.fs = require('fs')
+		window.url = require('url')
+		window.http = require('http')
+		window.path = require('path')
+		window.util = require('util')
+		window.events = require('events')
+		window.etag = require('etag')
+	</script>
+	<script src="index.js"></script>
+
+</body>
+</html>
