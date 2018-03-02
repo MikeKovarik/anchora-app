@@ -3,14 +3,94 @@
 	margin-left: 4px;
 }
 
-:root {
-	--accent: #42A5F5;
+[nowrap] {
+	white-space: nowrap;
 }
-a {
-	color: var(--accent);
-	text-decoration: none;
+input[type="radio"],
+input[type="checkbox"] {
+	flex-shrink: 0;
 }
 
 #status {
 	text-transform: capitalize;
+}
+
+button {
+	transition: all 0.2s;
+	text-transform: capitalize;
+}
+
+label > input[type="radio"],
+label > input[type="checkbox"] {
+	margin-right: 6px;
+}
+[fx-item] > input[type="radio"],
+[fx-item] > input[type="checkbox"] {
+	margin-right: 12px !important;
+}
+
+flexus-tabs {
+	margin-top: 8px !important;
+	margin-bottom: 8px !important;
+	align-self: flex-start;
+	text-transform: uppercase;
+	font-weight: 500;
+}
+	flexus-tabs > * {
+		padding: 0 var(--gutter) !important;
+	}
+
+#log {
+	font-size: 14px;
+}
+#log > * {
+	margin: 0;
+	padding: 3px 0;
+}
+#log > * + * {
+	border-top: 1px solid rgba(var(--foreground-rgb), 0.1)
+}
+
+
+.loader {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+	.loader > div {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		transform: rotate(225deg);
+		animation-iteration-count: infinite;
+		animation-name: orbit;
+		opacity: 0;
+		animation-duration: 5.5s;
+	}
+	.loader > div:after {
+		content: '';
+		position: absolute;
+		width: 13%;
+		height: 13%;
+		border-radius: 50%;
+		background: rgb(var(--foreground-rgb));
+	}
+    
+    .loader > div:nth-child(2) {  animation-delay: 280ms; }
+    .loader > div:nth-child(3) {  animation-delay: 560ms; }
+    .loader > div:nth-child(4) {  animation-delay: 840ms; }
+    .loader > div:nth-child(5) {  animation-delay: 1120ms; }
+
+
+@keyframes orbit { 
+  0%   {transform:rotate(225deg); animation-timing-function: ease-out; opacity: 1;} 
+  7%   {transform:rotate(345deg); animation-timing-function: linear;}
+  30%  {transform:rotate(455deg); animation-timing-function: ease-in-out;}
+  39%  {transform:rotate(690deg); animation-timing-function: linear;}
+  70%  {transform:rotate(815deg); animation-timing-function: ease-out; opacity: 1;}
+  75%  {transform:rotate(945deg); animation-timing-function: ease-out;}
+  76%  {transform:rotate(945deg); opacity: 0;}
+  100% {transform:rotate(945deg); opacity: 0;} 
 }

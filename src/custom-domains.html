@@ -1,0 +1,22 @@
+<template>
+
+	<div layout small-space>
+		<div flex-1>Domains</div>
+		<div flex-4 for="root">Root</div>
+	</div>
+
+	<div layout small-space>
+		<input flex-1 type="text" value="localhost:80" disabled>
+		<input flex-4 type="text" disabled value.bind="root">
+	</div>
+
+	<div layout small-space>
+		<input flex-1 type="text">
+		<input flex-4 type="text">
+	</div>
+
+	<p>Anchora can create custom domains for you, each of which can point to a different root folder. Useful for developing multiple projects</p>
+	<p>This modifies your hosts file located in <code>C:/Windows/System32/drivers/etc/</code></p>
+	<p>All custom domains run on the same port as localhost</p>
+
+</template>

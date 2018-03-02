@@ -1,0 +1,71 @@
+<template>
+
+	<flexus-view>
+
+		<div layout small-space>
+			<div two-line flex-1 nowrap>
+				<label for="http-port">HTTP Port</label>
+				<input type="number" id="http-port" value.bind="httpPort" disabled.bind="!http">
+			</div>
+			<div two-line flex-1 nowrap>
+				<label for="https-port">HTTPS Port</label>
+				<input type="number" id="https-port" value.bind="httpsPort" disabled.bind="!https && !http2">
+			</div>
+			<div two-line flex-4>
+				<label for="root">Root</label>
+				<input type="text" id="root" value.bind="root">
+			</div>
+		</div>
+
+		<div fx-item>
+			<label flex>
+				<input type="checkbox" checked.bind="http">
+				HTTP
+			</label>
+			<label flex>
+				<input type="checkbox" checked.bind="https">
+				HTTPS
+			</label>
+			<label flex title="Browsers only implement HTTP2 in secure mode. HTTP2 can never work on port 80.">
+				<input type="checkbox" checked.bind="http2">
+				HTTP/2.0
+			</label>
+
+			<div flex></div>
+<!--
+			<div class="loader">
+				<div></div><div></div><div></div><div></div><div></div>
+			</div>
+-->
+			<button
+			disabled.bind="buttonDisabled"
+			css="color: ${buttonColor}"
+			click.trigger="onButtonClick()">
+				${buttonText}
+			</button>
+
+		</div>
+
+		<flexus-tabs subtle no-bar>
+			<div>Settings</div>
+			<div>Log</div>
+			<!--div>Domains</div-->
+			<div>About</div>
+		</flexus-tabs>
+
+		<flexus-pages>
+			<compose narrow view="./settings.html"></compose>
+			<div id="log">
+				<pre repeat.for="log of logs">${log}</pre>
+			</div>
+			<!--compose narrow view="./custom-domains.html"></compose-->
+			<div>
+				<p>Created by Mike Kovařík, Mutiny.cz</p>
+				<p>Found a bug or feel like contributing?</p>
+				<p>You can find this <a href="https://github.com/MikeKovarik/anchora-app">app</a> and <a href="https://github.com/MikeKovarik/anchora">engine</a> on Github.</p>
+			</div>
+		</flexus-pages>
+
+	</flexus-view>
+
+</template>

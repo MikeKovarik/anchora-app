@@ -1,0 +1,191 @@
+<template>
+
+	<h4>General</h4>
+
+	<label fx-item>
+		<input type="checkbox" toggle>
+		Start the server on app's launch
+	</label>
+
+
+
+	<h4>Caching</h4>
+
+	<label fx-item>
+		<input type="checkbox" toggle checked disabled>
+		Server side, in memory
+	</label>
+
+	<label fx-item>
+		<input type="checkbox" toggle checked>
+		Client side
+	</label>
+
+	<label fx-item>
+		<input type="checkbox" toggle checked disabled>
+		ETag header in response. It makes caching more efficient, and saves bandwidth.
+	</label>
+
+	<label fx-item>
+		<input type="checkbox" toggle checked>
+		Respond with 304 Not Modified instead of 200 OK if the file hasn't changed since caching.
+	</label>
+
+	<label fx-item>
+		<span flex>Cache-Control header</span>
+		<input flex type="text" value.bind="cacheControl">
+	</label>
+
+	<!--label fx-item>
+		<span flex>Cache memory size</span>
+		<input flex type="number">
+	</label-->
+
+	<!--label fx-item>
+		<span flex>Max size of cached file</span>
+		<input flex type="number">
+	</label-->
+
+
+
+	<h4>CORS</h4>
+
+	<label fx-item>
+		<input type="checkbox" toggle checked.bind="cors">
+		Include Cross Domain headers in responses.
+	</label>
+
+	<fieldset disabled.bind="!cors">
+
+		<label fx-item>
+			<input type="checkbox" toggle checked.bind="corsCredentials">
+			Access-Control-Allow-Credentials
+		</label>
+
+		<label fx-item>
+			<div flex>Access-Control-Allow-Origin</div>
+			<input flex type="text" value.bind="corsOrigin">
+		</label>
+
+		<label fx-item>
+			<div flex>Access-Control-Allow-Methods</div>
+			<input flex type="text" value.bind="corsMethods">
+		</label>
+
+		<label fx-item>
+			<div flex>Access-Control-Allow-Headers</div>
+			<input flex type="text" value.bind="corsHeaders">
+		</label>
+
+	</fieldset>
+
+
+
+	<h4>Compression</h4>
+
+	<p>Anchora currently supports GZip and Deflate.</p>
+
+	<label fx-item>
+		<input type="radio"> Active mode: Compresses all files at the time of request.
+	</label>
+
+	<label fx-item>
+		<input type="radio"> Passive mode: Tries to send pre-compressed .gz variants of files.
+	</label>
+
+	<label fx-item>
+		<input type="radio"> No compression. Files are server as are.
+	</label>
+<!--
+	<label fx-item>
+		<input type="checkbox"> GZip
+	</label>
+
+	<label fx-item>
+		<input type="checkbox"> Deflate
+	</label>
+
+	<label fx-item>
+		<input type="checkbox" disabled> Brotli
+	</label>
+-->
+
+
+	<h4>HTTPS</h4>
+
+	<label fx-item>
+		<input type="checkbox" toggle checked.bind="allowUpgrade">
+		Allow upgrading from HTTP to HTTPS if requested with Upgrade-Insecure-Requests header.
+	</label>
+
+	<label fx-item>
+		<input type="checkbox" toggle checked.bind="forceUpgrade">
+		Force all insecure HTTP connections to upgrade to HTTPS by redirecting all HTTP requests.
+	</label>
+
+
+
+	<h4>HTTPS Certificates</h4>
+
+	<label fx-item>
+		<input type="checkbox" toggle checked.bind="generateCerts">
+		Generate and install self-signed certificate.
+	</label>
+
+	<p fx-item show.bind="!generateCerts">
+		Please include paths to custom certificate.
+	</p>
+
+	<fieldset disabled.bind="generateCerts">
+
+		<label fx-item>
+			<div flex>.crt file path</div>
+			<input flex type="text">
+		</label>
+
+		<label fx-item>
+			<div flex>.key file path</div>
+			<input flex type="text">
+		</label>
+
+	</fieldset>
+
+
+
+	<!--
+	<h4>Custom MIME types</h4>
+	<div layout small-space>
+		<div flex-1>Extension</div>
+		<div flex-4 for="root">MIME</div>
+	</div>
+	<div layout small-space>
+		<input flex-1 type="text">
+		<input flex-4 type="text">
+	</div>
+	-->
+
+	<h4>PHP / CGI (Experimental)</h4>
+	<div><input type="text"></div>
+	<p>If you'd like to see support for more CGI enabled languages, report a bug or help with development, please see our Gitub repo.</p>
+
+
+
+	<h4>Logging ${logFormat}</h4>
+
+	<label fx-item>
+		<input type="radio" value="errors" checked.bind="logFormat">
+		Log only errors and warnings
+	</label>
+
+	<label fx-item>
+		<input type="radio" value="all" checked.bind="logFormat">
+		Log everything (may cause slower performance)
+	</label>
+
+	<label fx-item>
+		<input type="checkbox">
+		Include timestamps
+	</label>
+
+
+</template>

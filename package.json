@@ -1,23 +1,41 @@
 {
-  "name": "fileserv",
+  "name": "Anchora Static Server",
   "description": "",
   "version": "1.0.0",
   "author": "Mike Kovařík",
   "license": "MIT",
-  "dependencies": {
-    "anchora-static-server": "latest"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MikeKovarik/anchora-app.git"
   },
   "scripts": {
     "run": "c:\\nwjs-sdk\\nw.exe ."
   },
   "main": "index.html",
   "window": {
-    "width": 500,
-    "height": 200,
+    "width": 580,
+    "height": 350,
     "show": true,
     "resizable": true
   },
+  "dependencies": {
+    "anchora": "0.0.1",
+    "aurelia-bootstrapper": "^2.1.1",
+    "systemjs": "0.20.13",
+    "systemjs-plugin-text": "0.0.9"
+  },
   "devDependencies": {
+    "babel-plugin-transform-class-properties": "^6.23.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-es2015-modules-amd": "^6.22.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-fn": "0.0.0",
+    "gulp-htmlmin": "^3.0.0",
+    "gulp-notify": "^2.2.0",
+    "gulp-plumber": "^1.1.0",
+    "gulp-sourcemaps": "^2.4.0",
     "@std/esm": "^0.18.0",
     "rollup": "^0.52.0"
   }
