@@ -3,7 +3,7 @@
 	<h4>General</h4>
 
 	<label fx-item>
-		<input type="checkbox" toggle>
+		<input type="checkbox" toggle checked.bind="autoStart">
 		Start the server on app's launch
 	</label>
 
@@ -11,29 +11,29 @@
 
 	<h4>Caching</h4>
 
+	<label vertical layout class="two-line-input">
+		Cache-Control header
+		<input flex type="text" value.bind="server.cacheControl">
+	</label>
+
 	<label fx-item>
 		<input type="checkbox" toggle checked disabled>
-		Server side, in memory
+		Server side cache. Stores frequently used files in memory.
 	</label>
 
 	<label fx-item>
 		<input type="checkbox" toggle checked>
-		Client side
+		Client side cache.
 	</label>
 
 	<label fx-item>
-		<input type="checkbox" toggle checked disabled>
+		<input type="checkbox" toggle disabled checked>
 		ETag header in response. It makes caching more efficient, and saves bandwidth.
 	</label>
 
 	<label fx-item>
-		<input type="checkbox" toggle checked>
+		<input type="checkbox" toggle disabled checked.bind="server.allow304">
 		Respond with 304 Not Modified instead of 200 OK if the file hasn't changed since caching.
-	</label>
-
-	<label fx-item>
-		<span flex>Cache-Control header</span>
-		<input flex type="text" value.bind="cacheControl">
 	</label>
 
 	<!--label fx-item>
@@ -51,30 +51,30 @@
 	<h4>CORS</h4>
 
 	<label fx-item>
-		<input type="checkbox" toggle checked.bind="cors">
+		<input type="checkbox" toggle checked.bind="server.cors">
 		Include Cross Domain headers in responses.
 	</label>
 
-	<fieldset disabled.bind="!cors">
+	<fieldset show.bind="server.cors">
 
 		<label fx-item>
-			<input type="checkbox" toggle checked.bind="corsCredentials">
+			<input type="checkbox" toggle checked.bind="server.corsCredentials">
 			Access-Control-Allow-Credentials
 		</label>
 
-		<label fx-item>
-			<div flex>Access-Control-Allow-Origin</div>
-			<input flex type="text" value.bind="corsOrigin">
+		<label vertical layout class="two-line-input">
+			Access-Control-Allow-Origin
+			<input type="text" value.bind="server.corsOrigin">
 		</label>
 
-		<label fx-item>
-			<div flex>Access-Control-Allow-Methods</div>
-			<input flex type="text" value.bind="corsMethods">
+		<label vertical layout class="two-line-input">
+			Access-Control-Allow-Methods
+			<input type="text" value.bind="server.corsMethods">
 		</label>
 
-		<label fx-item>
-			<div flex>Access-Control-Allow-Headers</div>
-			<input flex type="text" value.bind="corsHeaders">
+		<label vertical layout class="two-line-input">
+			Access-Control-Allow-Headers
+			<input type="text" value.bind="server.corsHeaders">
 		</label>
 
 	</fieldset>
@@ -86,15 +86,18 @@
 	<p>Anchora currently supports GZip and Deflate.</p>
 
 	<label fx-item>
-		<input type="radio"> Active mode: Compresses all files at the time of request.
+		<input type="radio" value="active" checked.bind="server.encoding">
+		Active mode: Compresses all files at the time of request.
 	</label>
 
 	<label fx-item>
-		<input type="radio"> Passive mode: Tries to send pre-compressed .gz variants of files.
+		<input type="radio" value="passive" checked.bind="server.encoding">
+		Passive mode: Tries to send pre-compressed .gz variants of files.
 	</label>
 
 	<label fx-item>
-		<input type="radio"> No compression. Files are server as are.
+		<input type="radio" value="false" checked.bind="server.encoding">
+		No compression. Files are server as are.
 	</label>
 <!--
 	<label fx-item>
@@ -114,12 +117,12 @@
 	<h4>HTTPS</h4>
 
 	<label fx-item>
-		<input type="checkbox" toggle checked.bind="allowUpgrade">
+		<input type="checkbox" toggle checked.bind="server.allowUpgrade">
 		Allow upgrading from HTTP to HTTPS if requested with Upgrade-Insecure-Requests header.
 	</label>
 
 	<label fx-item>
-		<input type="checkbox" toggle checked.bind="forceUpgrade">
+		<input type="checkbox" toggle checked.bind="server.forceUpgrade">
 		Force all insecure HTTP connections to upgrade to HTTPS by redirecting all HTTP requests.
 	</label>
 
@@ -131,7 +134,7 @@
 	<fieldset show.bind="!generateCerts">
 
 		<p fx-item>
-			Please include paths to custom certificate.
+			Please insert paths to certificate to use for HTTPS.
 		</p>
 
 		<label fx-item>
@@ -160,9 +163,16 @@
 	</div>
 	-->
 
+
+
 	<h4>PHP / CGI (Experimental)</h4>
-	<div><input type="text"></div>
-	<p>If you'd like to see support for more CGI enabled languages, report a bug or help with development, please see our Gitub repo.</p>
+
+	<label vertical layout class="two-line-input">
+		<span flex>Path to php-cgi.exe</span>
+		<input flex type="text" value.bind="server.phpPath">
+	</label>
+
+	<p secondary>If you'd like to see support for more CGI powered scripting languages, report a bug or help with development, please chekc out Anchora's Gitub repo. Basic implementation of CGI interface is in place so help with testing it is welcomed.</p>
 
 
 

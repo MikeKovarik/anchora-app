@@ -25,15 +25,16 @@ if (typeof global !== 'undefined') {
 } else {
 	// For when it's easier to quickly view the app from browser for UI tweaks.
 	var noop = () => {}
+	class AnchoraServer {
+		async setup() {}
+		listen() {}
+		close() {}
+		on() {}
+		emit() {}
+	}
 	System.set('anchora', System.newModule({
-		createServer: () => {
-			return {
-				listen: noop,
-				close: noop,
-				on: noop,
-				emit: noop,
-			}
-		},
+		AnchoraServer,
+		createServer: () => new AnchoraServer,
 		changeDebugger: noop,
 		resetDebugger: noop,
 	}))

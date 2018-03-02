@@ -1,6 +1,7 @@
 import {computedFrom, observable, inject, BindingEngine} from 'aurelia-framework'
 import anchora from 'anchora'
 import {Logger} from './logger'
+import {AnchoraBinding} from './AnchoraBinding'
 
 
 // TODO, future ideas
@@ -17,23 +18,32 @@ if (window.nw) {
 	})
 }
 
-var promiseTimeout = (millis = 0) => new Promise(resolve => setTimeout(resolve, millis))
-
-@inject(BindingEngine)
+@inject(BindingEngine, AnchoraBinding)
 export class AnchoraApp {
 
-	constructor(bindingEngine) {
-		this.options = {}
+	attached() {
+		this.$tabs = document.querySelector('flexus-tabs')
+	}
+
+	constructor(bindingEngine, server) {
+		window.scope = this
+
+		this.server = server
+
+		// Start listening to runtime errors and uncaught rejections.
 		this.logger = new Logger()
-		this.server = anchora.createServer(this.options)
+		// Focus Log tab whenever error occurs and gets printed into the log.
+		this.logger.onError = () => {
+			if (this.$tabs)
+				this.$tabs.selected = 1
+		}
+		// Also print out server's error events into the logs.
 		this.server.on('error', err => {
 			this.status = 'error'
 			this.logger.error(err)
 		})
-		//this.server.on('error', err => console.error('SERVER ERR', err))
 
 		this.server.on('listening', () => this.status = 'running')
-		this.server.on('error', () => this.status = 'error')
 		this.server.on('close', () => {
 			if (this.status !== 'restarting')
 				this.status = 'stopped'
@@ -50,84 +60,16 @@ export class AnchoraApp {
 					anchora.resetDebugger()
 			})
 
-		this.loadValues()
+		bindingEngine
+			.propertyObserver(this.server, 'cacheControl')
+			.subscribe((newValue, oldValue) => {
+				console.log('cacheControl', newValue, oldValue)
+			})
 
-		if (this.autoStart)
-			this.start()
-	}
-
-	loadValues() {
-		// Launched with argument to host specific folder
-		// TODO: make this not affect the default root stored in localstorage
-		//       because this will is a one-off instance launched through context menu
-		if (typeof process !== 'undefined' && process.argv.length > 1)
-			this.root = process.argv[1]
-		// Load stores values from localstorage or set default (on first launch)
-		if (this.http2)
-			this.https = false
-		if (localStorage.http2 === undefined && localStorage.https === undefined) {
-			// First launch. preffer HTTP2 over HTTPS
-			this.http2 = true
-			this.https = false
-		}
-		this.running = false
 		this.buttonText = 'start'
-		this.autoStart = localStorage.autoStart || true
-	}
 
-	@observable
-	httpPort = parseInt(localStorage.httpPort) || 80
-	httpPortChanged(newValue) {
-		localStorage.httpPort = newValue
-	}
-
-	@observable
-	httpsPort = parseInt(localStorage.httpsPort) || 443
-	httpsPortChanged(newValue) {
-		localStorage.httpsPort = newValue
-	}
-
-	@observable
-	http = localStorage.http === 'true'
-	httpChanged(newValue) {
-		localStorage.http = newValue
-	}
-
-	@observable
-	https = localStorage.https === 'true'
-	httpsChanged(newValue) {
-		localStorage.https = newValue
-		if (this.https)
-			this.http2 = false
-	}
-
-	@observable
-	http2 = localStorage.http2 === 'true'
-	http2Changed(newValue) {
-		localStorage.http2 = newValue
-		if (this.http2)
-			this.https = false
-	}
-
-	@observable
-	root = localStorage.root || 'C\\htdocs'
-	rootChanged(newValue) {
-		localStorage.root = newValue
-	}
-
-	@observable
-	generateCerts = localStorage.generateCerts === 'true'
-	generateCertsChanged(newValue) {
-		localStorage.generateCerts = newValue
-	}
-
-	@computedFrom('status')
-	get statusColor() {
-		var status = this.status
-		if (status === 'running') return 'green'
-		if (status === 'stopped') return 'gray'
-		if (status === 'error')   return 'red'
-		return 'orange'
+		//if (this.autoStart)
+		//	this.server.listen()
 	}
 
 	async onButtonClick() {
@@ -164,6 +106,13 @@ export class AnchoraApp {
 		this.buttonDisabled = false
 	}
 
+	@observable
+	autoStart = parseInt(localStorage.autoStart) || 443
+	autoStartChanged(newValue) {
+		console.log('autoStartChanged', newValue)
+		localStorage.autoStart = newValue
+	}
+
 /*
 	@computedFrom('this.server.listening')
 	get running() {
@@ -185,7 +134,7 @@ export class AnchoraApp {
 			this.server.once('close', this._start)
 		}
 	}
-*/
+
 	start() {
 		this.status = 'starting'
 		this._start()
@@ -202,5 +151,5 @@ export class AnchoraApp {
 	_stop() {
 		this.server.close()
 	}
-
+*/
 }

@@ -9,6 +9,10 @@
 input[type="radio"],
 input[type="checkbox"] {
 	flex-shrink: 0;
+	transition: background-color 60ms, color 60ms, border 60ms, opacity 60ms;
+}
+input:not([type="radio"]):not([type="checkbox"]) {
+	transition: background-color 160ms, color 160ms, border 160ms, opacity 160ms;
 }
 
 #status {
@@ -31,7 +35,6 @@ label > input[type="checkbox"] {
 
 flexus-tabs {
 	margin-top: 8px !important;
-	margin-bottom: 8px !important;
 	align-self: flex-start;
 	text-transform: uppercase;
 	font-weight: 500;
@@ -39,60 +42,30 @@ flexus-tabs {
 	flexus-tabs > * {
 		padding: 0 var(--gutter) !important;
 	}
+flexus-pages {
+	padding-top: 0 !important;
+}
 
 #log {
 	font-size: 14px;
 	font-family: monospace;
 	white-space: pre-line;
 }
-#log > * {
-	margin: 0;
-	padding: 3px 0;
-}
-#log > * + * {
-	border-top: 1px solid rgba(var(--foreground-rgb), 0.1)
-}
-
-
-.loader {
-  position: relative;
-  width: 24px;
-  height: 24px;
-}
-	.loader > div {
-		position: absolute;
-		top: 0;
-		right: 0;
-		bottom: 0;
-		left: 0;
-		transform: rotate(225deg);
-		animation-iteration-count: infinite;
-		animation-name: orbit;
-		opacity: 0;
-		animation-duration: 5.5s;
+	#log > .log-line {
+		margin: 0;
+		padding: 3px 0;
+		display: flex;
 	}
-	.loader > div:after {
-		content: '';
-		position: absolute;
-		width: 13%;
-		height: 13%;
-		border-radius: 50%;
-		background: rgb(var(--foreground-rgb));
+	#log > .log-line + .log-line {
+		border-top: 1px solid rgba(var(--foreground-rgb), 0.1)
 	}
-    
-    .loader > div:nth-child(2) {  animation-delay: 280ms; }
-    .loader > div:nth-child(3) {  animation-delay: 560ms; }
-    .loader > div:nth-child(4) {  animation-delay: 840ms; }
-    .loader > div:nth-child(5) {  animation-delay: 1120ms; }
+		.log-timestamp {
+			margin-right: 12px;
+		}
+		.log-text {
+			flex: 1;
+		}
 
-
-@keyframes orbit { 
-  0%   {transform:rotate(225deg); animation-timing-function: ease-out; opacity: 1;} 
-  7%   {transform:rotate(345deg); animation-timing-function: linear;}
-  30%  {transform:rotate(455deg); animation-timing-function: ease-in-out;}
-  39%  {transform:rotate(690deg); animation-timing-function: linear;}
-  70%  {transform:rotate(815deg); animation-timing-function: ease-out; opacity: 1;}
-  75%  {transform:rotate(945deg); animation-timing-function: ease-out;}
-  76%  {transform:rotate(945deg); opacity: 0;}
-  100% {transform:rotate(945deg); opacity: 0;} 
+.two-line-input {
+	margin: 10px 0 6px 0;
 }

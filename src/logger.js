@@ -28,17 +28,15 @@ export class Logger {
 		if (typeof process !== 'undefined') {
 			process.on('unhandledRejection', reason => {
 				// Stringify the error and push it out.
-				var processed = this._handleUnhandledRejection(reason)
-				this.error('NODE unhandledRejection:', processed)
+				this._handleUnhandledRejection(reason)
 				// Log the full unchanged error object to console with default console.error
-				this.originalError(reason)
+				this.originalError('NODE unhandledRejection:', reason)
 			})
 			process.on('uncaughtException', reason => {
 				// Stringify the error and push it out.
-				var processed = this._handleUnhandledRejection(reason)
-				this.error('NODE uncaughtException:', processed)
+				this._handleUnhandledRejection(reason)
 				// Log the full unchanged error object to console with default console.error
-				this.originalError(reason)
+				this.originalError('NODE uncaughtException:', reason)
 			})
 		}
 
@@ -50,10 +48,9 @@ export class Logger {
 				// Prevent error output on the console:
 				event.preventDefault()
 				// Stringify the error and push it out.
-				var processed = this._handleUnhandledRejection(reason)
-				this.error('BROWSER unhandledrejection:', processed)
+				this._handleUnhandledRejection(reason)
 				// Log the full unchanged error object to console with default console.error
-				this.originalError(reason)
+				this.originalError('BROWSER unhandledrejection:', reason)
 			})
 		}
 
@@ -73,14 +70,14 @@ export class Logger {
 
 	_handleUnhandledRejection(reason) {
 		if (typeof reason === 'string') {
-			return reason
+			this._error(reason)
 		} else if (reason instanceof Error) {
 			if (this.includeStack)
-				return reason.message + '\n' + reason.stack
+				this._error(reason.message + '\n' + reason.stack)
 			else
-				return reason.message
+				this._error(reason.message)
 		} else {
-			return JSON.stringify(reason)
+			this._error(JSON.stringify(reason))
 		}
 	}
 
@@ -92,7 +89,9 @@ export class Logger {
 	}
 
 	_getLogMessage(args) {
-		return args.map(arg => arg && arg.toString ? arg.toString() : JSON.stringify(arg))
+		return args
+			.map(arg => arg === undefined ? 'undefined' : JSON.stringify(arg))
+			.join(', ')
 	}
 
 	log(...args) {
@@ -114,11 +113,16 @@ export class Logger {
 
 	error(...args) {
 		this.originalError(...args)
+		this._error(this._getLogMessage(args))
+	}
+	_error(message) {
 		this.list.unshift({
 			color: 'red',
 			timestamp: this._getTimestamp(),
-			message: this._getLogMessage(args),
+			message,
 		})
+		if (this.onError)
+			this.onError()
 	}
 
 }
