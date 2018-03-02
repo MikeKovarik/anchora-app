@@ -42,6 +42,8 @@ flexus-tabs {
 
 #log {
 	font-size: 14px;
+	font-family: monospace;
+	white-space: pre-line;
 }
 #log > * {
 	margin: 0;

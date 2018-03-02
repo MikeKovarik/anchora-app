@@ -1,52 +1,125 @@
-export var logs = []
+import {observable} from 'aurelia-framework'
 
-function getTime() {
-	var date = new Date()
-	return date.getHours().toString().padStart(2, '0')
-	+ ':' + date.getMinutes().toString().padStart(2, '0')
-	+ ':' + date.getSeconds().toString().padStart(2, '0')
+
+export class Logger {
+
+	list = []
+	
+	includeStack = false
+	includeTimestamp = true
+
+	@observable
+	format = 'errors'
+
+	constructor(app) {
+
+		// Tap into console.log and console.error
+		this.originalLog = console._log = console.log.bind(console)
+		this.originalWarn = console._warn = console.warn.bind(console)
+		this.originalError = console._error = console.error.bind(console)
+
+		this.log = this.log.bind(this)
+		this.warn = this.warn.bind(this)
+		this.error = this.error.bind(this)
+
+		this.formatChanged()
+
+		// Handle Node errors
+		if (typeof process !== 'undefined') {
+			process.on('unhandledRejection', reason => {
+				// Stringify the error and push it out.
+				var processed = this._handleUnhandledRejection(reason)
+				this.error('NODE unhandledRejection:', processed)
+				// Log the full unchanged error object to console with default console.error
+				this.originalError(reason)
+			})
+			process.on('uncaughtException', reason => {
+				// Stringify the error and push it out.
+				var processed = this._handleUnhandledRejection(reason)
+				this.error('NODE uncaughtException:', processed)
+				// Log the full unchanged error object to console with default console.error
+				this.originalError(reason)
+			})
+		}
+
+		// Handle browser uncaught rejections.
+		if (typeof window !== 'undefined') {
+			window.addEventListener('unhandledrejection', event => {
+				// Error's reason can be a bit tricky to find, depending what caused it.
+				var reason = event.reason || event.detail && event.detail.reason
+				// Prevent error output on the console:
+				event.preventDefault()
+				// Stringify the error and push it out.
+				var processed = this._handleUnhandledRejection(reason)
+				this.error('BROWSER unhandledrejection:', processed)
+				// Log the full unchanged error object to console with default console.error
+				this.originalError(reason)
+			})
+		}
+
+	}
+
+	formatChanged(format = this.format) {
+		if (format === 'errors') {
+			console.log = this.originalLog
+			console.warn = this.warn
+			console.error = this.error
+		} else {
+			console.log = this.log
+			console.warn = this.warn
+			console.error = this.error
+		}
+	}
+
+	_handleUnhandledRejection(reason) {
+		if (typeof reason === 'string') {
+			return reason
+		} else if (reason instanceof Error) {
+			if (this.includeStack)
+				return reason.message + '\n' + reason.stack
+			else
+				return reason.message
+		} else {
+			return JSON.stringify(reason)
+		}
+	}
+
+	_getTimestamp() {
+		var date = new Date()
+		return date.getHours().toString().padStart(2, '0')
+		+ ':' + date.getMinutes().toString().padStart(2, '0')
+		+ ':' + date.getSeconds().toString().padStart(2, '0')
+	}
+
+	_getLogMessage(args) {
+		return args.map(arg => arg && arg.toString ? arg.toString() : JSON.stringify(arg))
+	}
+
+	log(...args) {
+		this.originalLog(...args)
+		this.list.unshift({
+			timestamp: this._getTimestamp(),
+			message: this._getLogMessage(args),
+		})
+	}
+
+	warn(...args) {
+		this.originalWarn(...args)
+		this.list.unshift({
+			color: 'orange',
+			timestamp: this._getTimestamp(),
+			message: this._getLogMessage(args),
+		})
+	}
+
+	error(...args) {
+		this.originalError(...args)
+		this.list.unshift({
+			color: 'red',
+			timestamp: this._getTimestamp(),
+			message: this._getLogMessage(args),
+		})
+	}
+
 }
 
-export function log(...args) {
-	var string = getTime() + ' - ' + args.map(arg => arg.toString())
-	logs.unshift(string)
-}
-
-// Handle all errors
-console._error = console.error.bind(console)
-console.error = (...args) => {
-	log(...args)
-	console._error(...args)
-}
-console._log = console.log.bind(console)
-console.log = (...args) => {
-	log(...args)
-	console._log(...args)
-}
-/*
-var $log = document.querySelector('#log')
-
-var _log = console.log.bind(console)
-console.log = function(...args) {
-	_log(...args)
-	$log.innerHTML += args.map(data => JSON.stringify(data, null, 4)).join(', ') + '\n'
-}
-*/
-
-// Handle Node errors
-if (typeof process !== 'undefined') {
-	process.on('unhandledRejection', reason => {
-		console.error('unhandledRejection', reason)
-	})
-	process.on('uncaughtException', reason => {
-		console.error('uncaughtException', reason)
-	})
-}
-
-window.addEventListener('unhandledrejection', event => {
-    // Prevent error output on the console:
-    event.preventDefault();
-    console.warn('unhandledrejection' + event.reason)
-    console.error(event.reason.message)
-    console._error(event.reason)
-})

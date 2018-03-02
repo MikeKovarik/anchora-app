@@ -123,20 +123,16 @@
 		Force all insecure HTTP connections to upgrade to HTTPS by redirecting all HTTP requests.
 	</label>
 
-
-
-	<h4>HTTPS Certificates</h4>
-
 	<label fx-item>
 		<input type="checkbox" toggle checked.bind="generateCerts">
 		Generate and install self-signed certificate.
 	</label>
 
-	<p fx-item show.bind="!generateCerts">
-		Please include paths to custom certificate.
-	</p>
+	<fieldset show.bind="!generateCerts">
 
-	<fieldset disabled.bind="generateCerts">
+		<p fx-item>
+			Please include paths to custom certificate.
+		</p>
 
 		<label fx-item>
 			<div flex>.crt file path</div>
@@ -170,21 +166,28 @@
 
 
 
-	<h4>Logging ${logFormat}</h4>
+	<h4>Logging</h4>
+
+	<p>This is a developer's territory. You probably don't need to change anything here.</p>
 
 	<label fx-item>
-		<input type="radio" value="errors" checked.bind="logFormat">
+		<input type="radio" value="errors" checked.bind="logger.format">
 		Log only errors and warnings
 	</label>
 
 	<label fx-item>
-		<input type="radio" value="all" checked.bind="logFormat">
-		Log everything (may cause slower performance)
+		<input type="radio" value="all" checked.bind="logger.format">
+		Log everything (affects performance)
 	</label>
 
 	<label fx-item>
-		<input type="checkbox">
+		<input type="checkbox" checked.bind="logger.includeTimestamp">
 		Include timestamps
+	</label>
+
+	<label fx-item>
+		<input type="checkbox" checked.bind="logger.includeStack">
+		Include stack trace
 	</label>
 
 

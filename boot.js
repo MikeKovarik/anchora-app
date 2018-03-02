@@ -24,15 +24,18 @@ if (typeof global !== 'undefined') {
 	System.set('nw.gui', System.newModule(global.require('nw.gui')))
 } else {
 	// For when it's easier to quickly view the app from browser for UI tweaks.
+	var noop = () => {}
 	System.set('anchora', System.newModule({
 		createServer: () => {
 			return {
-				listen: () => {},
-				close: () => {},
-				on: () => {},
-				emit: () => {},
+				listen: noop,
+				close: noop,
+				on: noop,
+				emit: noop,
 			}
-		}
+		},
+		changeDebugger: noop,
+		resetDebugger: noop,
 	}))
 }
 

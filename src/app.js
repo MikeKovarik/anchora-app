@@ -1,6 +1,6 @@
-import {computedFrom, observable} from 'aurelia-framework'
+import {computedFrom, observable, inject, BindingEngine} from 'aurelia-framework'
 import anchora from 'anchora'
-import {logs, log} from './logger'
+import {Logger} from './logger'
 
 
 // TODO, future ideas
@@ -19,16 +19,16 @@ if (window.nw) {
 
 var promiseTimeout = (millis = 0) => new Promise(resolve => setTimeout(resolve, millis))
 
+@inject(BindingEngine)
 export class AnchoraApp {
 
-	constructor() {
-		window.scope = this
+	constructor(bindingEngine) {
 		this.options = {}
-		this.logs = logs
+		this.logger = new Logger()
 		this.server = anchora.createServer(this.options)
 		this.server.on('error', err => {
 			this.status = 'error'
-			log(err)
+			this.logger.error(err)
 		})
 		//this.server.on('error', err => console.error('SERVER ERR', err))
 
@@ -38,6 +38,17 @@ export class AnchoraApp {
 			if (this.status !== 'restarting')
 				this.status = 'stopped'
 		})
+
+		// Hook into Anchora's logger. It uses 'debug' module by default
+		// but those messages could be rerouted to app's DOM logger.
+		bindingEngine
+			.propertyObserver(this.logger, 'format')
+			.subscribe(format => {
+				if (format === 'all')
+					anchora.changeDebugger(this.logger.log)
+				else
+					anchora.resetDebugger()
+			})
 
 		this.loadValues()
 
@@ -66,44 +77,48 @@ export class AnchoraApp {
 
 	@observable
 	httpPort = parseInt(localStorage.httpPort) || 80
-	httpPortChanged(newValue, oldValue) {
-		localStorage.httpPort = this.httpPort
+	httpPortChanged(newValue) {
+		localStorage.httpPort = newValue
 	}
 
 	@observable
 	httpsPort = parseInt(localStorage.httpsPort) || 443
-	httpsPortChanged(newValue, oldValue) {
-		localStorage.httpsPort = this.httpsPort
+	httpsPortChanged(newValue) {
+		localStorage.httpsPort = newValue
 	}
 
 	@observable
 	http = localStorage.http === 'true'
-	httpChanged(newValue, oldValue) {
-		localStorage.http = this.http
+	httpChanged(newValue) {
+		localStorage.http = newValue
 	}
 
 	@observable
 	https = localStorage.https === 'true'
-	httpsChanged(newValue, oldValue) {
-		console.log('httpsChanged')
-		localStorage.https = this.https
+	httpsChanged(newValue) {
+		localStorage.https = newValue
 		if (this.https)
 			this.http2 = false
 	}
 
 	@observable
 	http2 = localStorage.http2 === 'true'
-	http2Changed(newValue, oldValue) {
-		console.log('http2Changed')
-		localStorage.http2 = this.http2
+	http2Changed(newValue) {
+		localStorage.http2 = newValue
 		if (this.http2)
 			this.https = false
 	}
 
 	@observable
 	root = localStorage.root || 'C\\htdocs'
-	rootChanged(newValue, oldValue) {
-		localStorage.root = this.root
+	rootChanged(newValue) {
+		localStorage.root = newValue
+	}
+
+	@observable
+	generateCerts = localStorage.generateCerts === 'true'
+	generateCertsChanged(newValue) {
+		localStorage.generateCerts = newValue
 	}
 
 	@computedFrom('status')
@@ -131,20 +146,20 @@ export class AnchoraApp {
 		this.buttonDisabled = true
 		if (this.buttonText === 'start') {
 			this.buttonText = 'starting'
-			log('starting')
+			this.logger.log('starting')
 		}
 		if (this.buttonText === 'stop') {
 			this.buttonText = 'stopping'
-			log('stopping')
+			this.logger.log('stopping')
 		}
 		await promiseTimeout(699)
 		if (this.buttonText === 'starting') {
 			this.buttonText = 'stop'
-			log('running')
+			this.logger.log('running')
 		}
 		if (this.buttonText === 'stopping') {
 			this.buttonText = 'start'
-			log('stopped')
+			this.logger.log('stopped')
 		}
 		this.buttonDisabled = false
 	}
