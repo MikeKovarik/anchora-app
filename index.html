@@ -7,11 +7,22 @@
 	<link rel="stylesheet" type="text/css" href="node_modules/flexus/css/flexus-neon-icons.css">
 	<link rel="stylesheet" type="text/css" href="style/style.css">
 </head>
-<body fx-app light accent="#42A5F5" aurelia-app="config">
+<body fx-app light accent="#42A5F5">
+
+	<flexus-titlebar no-push>
+		<div flex drag>Anchora: HTTP Static Server</div>
+		<button icon="win-minimize"></button>
+		<button icon="win-maximize"></button>
+		<button icon="win-close"></button>
+	</flexus-titlebar>
+
+	<flexus-scene aurelia-app="config"></flexus-scene>
 
 	<!-- flexus ui framework -->
 	<script src="node_modules/flexus/lib/ganymede.js"></script>
 	<script src="node_modules/flexus/lib/flexus.js"></script>
+	<!--script src="node_modules/flexus/elements/scene.js"></script>
+	<script src="node_modules/flexus/elements/view.js"></script-->
 	<script src="node_modules/flexus/elements/tabs.js"></script>
 	<script src="node_modules/flexus/elements/pages.js"></script>
 	<!-- systemjs and aureliea mvc framework -->

@@ -1,6 +1,14 @@
-[layout][small-space] > * + *,
-[layout] > button + * {
-	margin-left: 4px;
+/*
+//////////////////////// ADJUSTS TO FLEXUS UI FRAMEWORK DEFAULTS
+*/
+
+
+[small-space] > *:not(:last-child) {
+	margin-right: 4px;
+}
+[center][left] {
+	align-items: center;
+	justify-content: flex-start;
 }
 
 [nowrap] {
@@ -13,10 +21,6 @@ input[type="checkbox"] {
 }
 input:not([type="radio"]):not([type="checkbox"]) {
 	transition: background-color 160ms, color 160ms, border 160ms, opacity 160ms;
-}
-
-#status {
-	text-transform: capitalize;
 }
 
 button {
@@ -33,18 +37,85 @@ label > input[type="checkbox"] {
 	margin-right: 12px !important;
 }
 
-flexus-tabs {
-	margin-top: 8px !important;
-	align-self: flex-start;
-	text-transform: uppercase;
-	font-weight: 500;
+
+/*
+//////////////////////// APP UI
+*/
+
+body {
+	background: transparent !important;
 }
-	flexus-tabs > * {
-		padding: 0 var(--gutter) !important;
+
+flexus-view {
+	/* pushing away content because of titlebar */
+	/*padding-top: calc(1rem + var(--titlebar-height));*/
+	padding-top: 32px;
+}
+
+flexus-view[master] {
+	flex: 1;
+	max-width: 300px;
+	background-color: rgba(240, 240, 240, 0.9);
+	background-image: url('../img/acrylic-noise.png');
+	background-repeat: repeat;
+}
+	flexus-view[master] h5 {
+		height: 32px;
+		display: inline-flex;
+		align-items: center;
 	}
-flexus-pages {
-	padding-top: 0 !important;
+	flexus-view[master] main {
+		display: flex;
+		flex-direction: column;
+	}
+		flexus-view[master] button {
+			align-self: flex-start;
+		}
+		flexus-view[master] progress {
+			width: 100%
+		}
+
+		#memory-meter {
+			animation: fade-in 200ms, slide-from-right 140ms;
+		}
+
+@keyframes fade-in {
+	from {opacity: 0;}
+	to   {opacity: 1;}
 }
+@keyframes slide-up {
+	from {transform: translate3d(0px, 10px, 0);}
+	to   {transform: translate3d(0px, 0px, 0);}
+}
+@keyframes slide-from-right {
+	from {transform: translate3d(10px, 0px, 0);}
+	to   {transform: translate3d(0px, 0px, 0);}
+}
+@keyframes fade-up {
+	from {opacity: 0; transform: translate3d(0px, 10px, 0);}
+	to   {opacity: 1; transform: translate3d(0px, 0px, 0);}
+}
+
+flexus-view[detail] {
+	flex: 2;
+	background-color: #FFF;
+}
+	flexus-tabs {
+		align-self: flex-start;
+		font-weight: 500;
+		font-size: 17px;
+		--toolbar-min-height: 32px;
+		margin: 0 -0.5rem !important;
+		margin-bottom: 1.5rem !important;
+	}
+		flexus-tabs > * {
+			padding: 0 !important;
+			margin: 0 0.5rem !important;
+		}
+	flexus-pages {
+		padding-top: 0 !important;
+	}
+
 
 #log {
 	font-size: 14px;
@@ -69,3 +140,5 @@ flexus-pages {
 .two-line-input {
 	margin: 10px 0 6px 0;
 }
+
+

@@ -2,7 +2,6 @@ import {observable, computedFrom} from 'aurelia-framework'
 import {AnchoraServer} from 'anchora'
 
 
-console.log('AnchoraServer', AnchoraServer)
 export class AnchoraBinding extends AnchoraServer {
 
 	constructor() {

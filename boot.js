@@ -12,7 +12,7 @@ SystemJS.config({
 		"stream": "@node/stream",
 		"zlib": "@node/zlib",
 		"child_process": "@node/child_process",
-	},
+	}
 })
 
 if (typeof global !== 'undefined') {
@@ -21,7 +21,6 @@ if (typeof global !== 'undefined') {
 	// Be like Mike. Don't give a fuck and just short circuit it. it works...
 	// Technically. This isn't even a hack.
 	System.set('anchora', System.newModule(global.require('anchora')))
-	System.set('nw.gui', System.newModule(global.require('nw.gui')))
 } else {
 	// For when it's easier to quickly view the app from browser for UI tweaks.
 	var noop = () => {}

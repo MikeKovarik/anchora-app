@@ -1,47 +1,49 @@
 <template>
 
-	<require from="./custom-attribute-foreground"></require>
+	<flexus-view master>
+		<main>
 
-	<flexus-view>
-
-		<div layout small-space>
-			<div two-line flex-1 nowrap>
-				<label for="http-port">HTTP Port</label>
-				<input  id="http-port" type="number"
-				value.bind="server.unsecurePort"
-				disabled.bind="!server.unsecure">
+			<div layout small-space>
+				<div two-line flex-1 nowrap>
+					<h5>HTTP Port</h5>
+					<input type="number"
+					value.bind="server.unsecurePort"
+					disabled.bind="!server.unsecure">
+				</div>
+				<div two-line flex-1 nowrap>
+					<h5>HTTPS Port</h5>
+					<input type="number"
+					value.bind="server.securePort"
+					disabled.bind="!server.secure">
+				</div>
 			</div>
-			<div two-line flex-1 nowrap>
-				<label for="https-port">HTTPS Port</label>
-				<input  id="https-port" type="number"
-				value.bind="server.securePort"
-				disabled.bind="!server.secure">
-			</div>
-			<div two-line flex-4>
-				<label for="root">Root</label>
-				<input  id="root" type="text"
-				value.bind="server.root">
-			</div>
-		</div>
 
-		<div fx-item>
-			<label flex>
-				<input type="checkbox" checked.bind="server.http">
-				HTTP
-			</label>
-			<label flex>
-				<input type="checkbox" checked.bind="server.https">
-				HTTPS
-			</label>
-			<label flex title="Browsers only implement HTTP2 in secure mode. HTTP2 can never work on port 80.">
-				<input type="checkbox" checked.bind="server.http2">
-				HTTP/2.0
-			</label>
-			${server.http}
-			${server.https}
-			${server.http2}
+			<h5>Root</h5>
+			<input type="text" value.bind="server.root">
 
-			<div flex></div>
+			<h5>Protocols</h5>
+			<div fx-item small-space>
+				<label layout left center flex>
+					<input type="checkbox" checked.bind="server.https">
+					HTTPS
+				</label>
+				<label layout left center flex>
+					<input type="checkbox" checked.bind="server.http">
+					HTTP
+				</label>
+			</div>
+
+			<div fx-item small-space>
+				<label layout left center flex title="Browsers only implement HTTP2 in secure mode. HTTP2 can never work on port 80.">
+					<input type="checkbox" checked.bind="server.http2">
+					HTTP/2.0
+				</label>
+				<div>
+					${server.https}
+					${server.http2}
+					${server.secure}
+				</div>
+			</div>
 
 			<button
 			disabled.bind="buttonDisabled"
@@ -50,9 +52,46 @@
 				${buttonText}
 			</button>
 
-		</div>
+<!--
+			<label fx-item>
+				<input type="checkbox" checked.bind="server.http">
+				HTTP
+			</label>
+			<label fx-item>
+				<input type="checkbox" checked.bind="server.https">
+				HTTPS
+			</label>
+			<label fx-item title="Browsers only implement HTTP2 in secure mode. HTTP2 can never work on port 80.">
+				<input type="checkbox" checked.bind="server.http2">
+				HTTP/2.0
+			</label>
 
-		<flexus-tabs subtle no-bar>
+			<button
+			disabled.bind="buttonDisabled"
+			css="color: ${buttonColor}"
+			click.trigger="onButtonClick()">
+				${buttonText}
+			</button>
+-->
+
+			<div flex></div>
+
+			<div show.bind="server.listening" id="memory-meter">
+				<h5>In-Memory Cache</h5>
+				<div layout>
+					<span>${server.cache.memoryTaken} used</span>
+					<span flex></span>
+					<span>${server.cache.maxSize} free</span>
+				</div>
+				<progress fullwidth value="22" max="100"></progress>
+			</div>
+
+		</main>
+	</flexus-view>
+
+	<flexus-view detail>
+
+		<flexus-tabs subtle>
 			<div>Settings</div>
 			<div>Log</div>
 			<!--div>Domains</div-->
@@ -60,21 +99,10 @@
 		</flexus-tabs>
 
 		<flexus-pages>
-			<compose narrow view="./settings.html"></compose>
-			<div id="log">
-				<div class="log-line" repeat.for="log of logger.list" foreground.one-time="log.color">
-					<span if.one-time="logger.includeTimestamp" class="log-timestamp">
-						${log.timestamp & oneTime}
-					</span>
-					<span class="log-text">${log.message & oneTime}</span>
-				</div>
-			</div>
-			<!--compose narrow view="./custom-domains.html"></compose-->
-			<div>
-				<p>Created by Mike Kovařík, Mutiny.cz</p>
-				<p>Found a bug or feel like contributing?</p>
-				<p>You can find this <a href="https://github.com/MikeKovarik/anchora-app">app</a> and <a href="https://github.com/MikeKovarik/anchora">engine</a> on Github.</p>
-			</div>
+			<compose id="settings" narrow view="./settings.html"></compose>
+			<compose id="log" view="./log.html"></compose>
+			<!--compose view="./custom-domains.html"></compose-->
+			<compose id="about" view="./about.html"></compose>
 		</flexus-pages>
 
 	</flexus-view>

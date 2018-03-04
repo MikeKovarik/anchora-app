@@ -1,0 +1,12 @@
+<template>
+
+	<require from="./custom-attribute-foreground"></require>
+
+	<div class="log-line" repeat.for="log of logger.list" foreground.one-time="log.color">
+		<span if.one-time="logger.includeTimestamp" class="log-timestamp">
+			${log.timestamp & oneTime}
+		</span>
+		<span class="log-text">${log.message & oneTime}</span>
+	</div>
+
+</template>

@@ -51,7 +51,7 @@ export class AnchoraApp {
 
 		// Hook into Anchora's logger. It uses 'debug' module by default
 		// but those messages could be rerouted to app's DOM logger.
-		bindingEngine
+		/*bindingEngine
 			.propertyObserver(this.logger, 'format')
 			.subscribe(format => {
 				if (format === 'all')
@@ -59,12 +59,7 @@ export class AnchoraApp {
 				else
 					anchora.resetDebugger()
 			})
-
-		bindingEngine
-			.propertyObserver(this.server, 'cacheControl')
-			.subscribe((newValue, oldValue) => {
-				console.log('cacheControl', newValue, oldValue)
-			})
+*/
 
 		this.buttonText = 'start'
 
@@ -94,7 +89,7 @@ export class AnchoraApp {
 			this.buttonText = 'stopping'
 			this.logger.log('stopping')
 		}
-		await promiseTimeout(699)
+		//await promiseTimeout(699)
 		if (this.buttonText === 'starting') {
 			this.buttonText = 'stop'
 			this.logger.log('running')
@@ -103,11 +98,12 @@ export class AnchoraApp {
 			this.buttonText = 'start'
 			this.logger.log('stopped')
 		}
+		this.server.listening = true
 		this.buttonDisabled = false
 	}
 
 	@observable
-	autoStart = parseInt(localStorage.autoStart) || 443
+	autoStart = localStorage.autoStart === 'true'
 	autoStartChanged(newValue) {
 		console.log('autoStartChanged', newValue)
 		localStorage.autoStart = newValue

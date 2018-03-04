@@ -1,5 +1,5 @@
 {
-  "name": "Anchora Static Server",
+  "name": "Anchora HTTP Static Server",
   "description": "",
   "version": "1.0.0",
   "author": "Mike Kovařík",
@@ -13,10 +13,12 @@
   },
   "main": "index.html",
   "window": {
-    "width": 580,
-    "height": 350,
-    "show": true,
-    "resizable": true
+    "width": 700,
+    "height": 450,
+    "resizable": true,
+    "toolbar": false,
+    "frame": false,
+    "show": true
   },
   "dependencies": {
     "anchora": "0.0.1",
