@@ -1,4 +1,4 @@
-# Anchora: HTTP/2.0 server for Windows 10
+# Anchora App: HTTP/2.0 Static Server for Windows 10
 
 👨‍💻 Localhost has never been sexier. Simple yet powerful static server app for Windows
 
@@ -8,11 +8,11 @@
 
 ## What is it?
 
-The first HTTP static server app to be released in Windows Store.
+The first HTTP static server app to be released in Windows Store. Oh and it's also the most fun to use, the easiest, the most beautiful, ... you get the point.
 
-A Lightweight alternative to bundles like XAMPP, WampServer and effortless alternative to Apache server. Oh and it's also the most fun to use, the easiest, the most beautiful, ... you get the point.
+A Lightweight alternative to bulky bundles like XAMPP, WampServer and an effortless alternative to Apache server. Those tools are usually out of date (*try using .mjs extension in chrome*), require admin priviledges and come with a lot of baggage (*phpmyadmin, mysql, perl, etc...*) when all you sometime need is a simple way to host files.
 
-Besides it's pretty face sits powerfull [Anchora engine](https://github.com/MikeKovarik/anchora-app) (available as an npm module [`anchora`](https://www.npmjs.com/package/anchora)). Hybrid of HTTP1 and HTTP/2.0 with implementation of HTTP2 Push streams. NO need to configure anything. NO htacces files. NO preload attributes. NO nothing. Effortless. Just works, out of the box. Yeah, that's right. This puppy does 0 to 60mph in 300 milliseconds. Comparable if not faster than Apache!
+Besides it's pretty face sits powerfull [Anchora eEgine](https://github.com/MikeKovarik/anchora) (*available as an npm module [`anchora`](https://www.npmjs.com/package/anchora)*). Hybrid of HTTP1 and HTTP/2.0 with implementation of HTTP2 Push streams. Configured to be blazing fast and utilitarian, thanks to caching on both ends, generating self-signed HTTP certificates, CORS, and more. NO need to configure anything. NO htacces files. NO nothing. Effortless. It just works, out of the box. Yeah, that's right. This puppy does 0 to 60mph in 300 milliseconds. Comparable if not faster than Apache!
 
 ## Current state
 
@@ -26,7 +26,8 @@ This repository, which hosts the app itself, as portryed on the screenshot, stil
 
 This is just te beginning. There are more features planned for Anchora.
 
-## Come join us
+
+## Join the discussion
 
 Wanna come say hi, discuss the ideas and features, help out with fixing bugs or sharing about your workflow so that we could make Anchora suit you even better?
 Join our strictly casual [discord server](https://discord.gg/3qUU6wK).
