@@ -1,0 +1,13 @@
+{
+  "name": "winblurbg",
+  "main": "main.js",
+  "dependencies": {
+    "nan": "^2.9.2",
+    "node-gyp": "^3.6.2"
+  },
+  "scripts": {
+    "compile": "node-gyp rebuild",
+    "start": "node main.js"
+  },
+  "gypfile": true
+}
