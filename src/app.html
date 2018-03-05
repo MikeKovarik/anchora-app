@@ -38,11 +38,6 @@
 					<input type="checkbox" checked.bind="server.http2">
 					HTTP/2.0
 				</label>
-				<div>
-					${server.https}
-					${server.http2}
-					${server.secure}
-				</div>
 			</div>
 
 			<button
@@ -51,28 +46,6 @@
 			click.trigger="onButtonClick()">
 				${buttonText}
 			</button>
-
-<!--
-			<label fx-item>
-				<input type="checkbox" checked.bind="server.http">
-				HTTP
-			</label>
-			<label fx-item>
-				<input type="checkbox" checked.bind="server.https">
-				HTTPS
-			</label>
-			<label fx-item title="Browsers only implement HTTP2 in secure mode. HTTP2 can never work on port 80.">
-				<input type="checkbox" checked.bind="server.http2">
-				HTTP/2.0
-			</label>
-
-			<button
-			disabled.bind="buttonDisabled"
-			css="color: ${buttonColor}"
-			click.trigger="onButtonClick()">
-				${buttonText}
-			</button>
--->
 
 			<div flex></div>
 

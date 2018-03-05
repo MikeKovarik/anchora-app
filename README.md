@@ -12,7 +12,7 @@ The first HTTP static server app to be released in Windows Store. Oh and it's al
 
 A Lightweight alternative to bulky bundles like XAMPP, WampServer and an effortless alternative to Apache server. Those tools are usually out of date (*try using .mjs extension in chrome*), require admin priviledges and come with a lot of baggage (*phpmyadmin, mysql, perl, etc...*) when all you sometime need is a simple way to host files.
 
-Besides it's pretty face sits powerfull [Anchora eEgine](https://github.com/MikeKovarik/anchora) (*available as an npm module [`anchora`](https://www.npmjs.com/package/anchora)*). Hybrid of HTTP1 and HTTP/2.0 with implementation of HTTP2 Push streams. Configured to be blazing fast and utilitarian, thanks to caching on both ends, generating self-signed HTTP certificates, CORS, and more. NO need to configure anything. NO htacces files. NO nothing. Effortless. It just works, out of the box. Yeah, that's right. This puppy does 0 to 60mph in 300 milliseconds. Comparable if not faster than Apache!
+Besides it's pretty face sits powerfull [Anchora Egine](https://github.com/MikeKovarik/anchora) (*available as an npm module [`anchora`](https://www.npmjs.com/package/anchora)*). Hybrid of HTTP1 and HTTP/2.0 with implementation of HTTP2 Push streams. Configured to be blazing fast and utilitarian, thanks to caching on both ends, generating self-signed HTTP certificates, CORS, and more. NO need to configure anything. NO htacces files. NO nothing. Effortless. It just works, out of the box. Yeah, that's right. This puppy does 0 to 60mph in 300 milliseconds. Comparable if not faster than Apache!
 
 ## Current state
 

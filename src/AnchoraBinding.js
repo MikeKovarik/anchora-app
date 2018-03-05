@@ -1,86 +1,118 @@
-import {observable, computedFrom} from 'aurelia-framework'
+import {observable, computedFrom, inject, BindingEngine} from 'aurelia-framework'
 import {AnchoraServer} from 'anchora'
 
 
-export class AnchoraBinding extends AnchoraServer {
+// NOTE: AnchoraBinding does not directly inherit AnchoraServer anymore due to
+//       problems caused by difference between Node JS context and Chromium context.
+//       Aurelia's binding engine couldn't catch some events and listen to changes
+//       causing the UI out of sync and not representative of actual settings running
+//       in Node context of anchora's server instance.
 
-	constructor() {
-		console.log('AnchoraBinding 1')
-		super()
-		console.log('AnchoraBinding 2')
-		console.log('this.cacheControl', this.cacheControl)
-		//this.setup()
+@inject(BindingEngine)
+export class AnchoraBinding {
+
+	on() {} // TODO deleteme
+
+	constructor(bindingEngine) {
+		this.bindingEngine = bindingEngine
+		this.server = {unsecurePort: 80, securePort: 443} // TODO deleteme
 	}
 
-	@observable
-	cacheControl = 'FOO'
-	cacheControlChanged(newValue) {
-		console.log('cacheControlChanged', newValue)
+	getBindableProperties() {
+		var bindable = Object.keys(this)
+		var proto = this.constructor.prototype
+		var protoDesc = Object.getOwnPropertyDescriptors(proto)
+		for (var [name, descriptor] of Object.entries(protoDesc)) {
+			if (name.startsWith('_')) continue
+			if (descriptor.get && !descriptor.set) continue
+			if (typeof descriptor.value === 'function') continue
+			if (typeof proto[name] === 'function') continue
+			if (bindable.includes(name)) continue
+			bindable.push(name)
+		}
+		bindable = bindable.filter(name => name !== 'bindingEngine' && name !== 'server')
+		return bindable
 	}
 
+	setupBinding() {
+		var {server, bindingEngine} = this
+		this.getBindableProperties()
+			.forEach(name => {
+				//console.log('###', name, this[name])
+				if (this[name] !== undefined)
+					server[name] = this[name]
+				else {
+					let stored = localStorage[name]
+					if (stored) {
+						switch (this[`_${name}Type`]) {
+							case Boolean:
+								stored = stored === 'true'
+								break
+							case Number:
+								stored = parseInt(stored)
+								break
+						}
+					}
+					this[name] = stored || server[name]
+				}
+				bindingEngine
+					.propertyObserver(this, name)
+					.subscribe(newValue => {
+						//console.log('changing', name, newValue)
+						localStorage[name] = newValue
+						server[name] = newValue
+					})
+			})
+	}
+
+	@computedFrom('cacheControl')
+	get clientCacheEnabled() {
+		if (!this.cacheControl) return true
+		var cc = this.cacheControl.toLowerCase().trim()
+		return cc !== 'no-cache'
+			&& cc !== 'max-age=0'
+	}
 
 	@computedFrom('http')
 	get unsecure() {
-		console.log('get unsecure')
 		return this.http
 	}
 
 	@computedFrom('https', 'http2')
 	get secure() {
-		console.log('get secure')
 		return this.https || this.http2
 	}
 
-	@observable
-	root = localStorage.root || 'C:\\htdocs'
-	rootChanged(newValue) {
-		console.log('rootChanged', newValue)
-		localStorage.root = newValue
-	}
+	_httpType = Boolean
+	_httpsType = Boolean
+	_http2Type = Boolean
+	_securePortType = Number
+	_unsecurePortType = Number
 
 	@observable
-	unsecurePort = parseInt(localStorage.unsecurePort) || 80
-	unsecurePortChanged(newValue) {
-		console.log('unsecurePortChanged', newValue)
-		localStorage.unsecurePort = newValue
-	}
-
-	@observable
-	securePort = parseInt(localStorage.securePort) || 443
-	securePortChanged(newValue) {
-		console.log('securePortChanged', newValue)
-		localStorage.securePort = newValue
-	}
-
-	@observable
-	forceUpgrade
-
-	@observable
-	allowUpgrade
-
-	@observable
-	http = localStorage.http === 'true'
-	httpChanged(newValue) {
-		this.unsecure = localStorage.http = newValue
-	}
-
-	@observable
-	https = localStorage.https === 'true'
+	https
 	httpsChanged(newValue) {
-		console.log('httpsChanged', newValue)
-		localStorage.https = newValue
 		if (newValue)
 			this.http2 = false
 	}
 
 	@observable
-	http2 = localStorage.http2 === 'true'
+	http2
 	http2Changed(newValue) {
-		console.log('http2Changed', newValue)
-		localStorage.http2 = newValue
 		if (newValue)
 			this.https = false
 	}
 
+	@observable
+	unsecurePort
+	unsecurePortChanged(newValue) {
+		console.log('unsecurePort changed. TODO: restart server')
+	}
+
+	@observable
+	securePort
+	securePortChanged(newValue) {
+		console.log('securePort changed. TODO: restart server')
+	}
 
 }

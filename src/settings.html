@@ -17,23 +17,22 @@
 	</label>
 
 	<label fx-item>
-		<input type="checkbox" toggle checked disabled>
-		Server side cache. Stores frequently used files in memory.
-	</label>
-
-	<label fx-item>
-		<input type="checkbox" toggle checked>
-		Client side cache.
-	</label>
-
-	<label fx-item>
-		<input type="checkbox" toggle disabled checked>
+		<input type="checkbox" toggle
+		disabled
+		checked.bind="server.clientCacheEnabled">
 		ETag header in response. It makes caching more efficient, and saves bandwidth.
 	</label>
 
 	<label fx-item>
-		<input type="checkbox" toggle disabled checked.bind="server.allow304">
+		<input type="checkbox" toggle
+		disabled
+		checked.bind="server.clientCacheEnabled">
 		Respond with 304 Not Modified instead of 200 OK if the file hasn't changed since caching.
+	</label>
+
+	<label fx-item>
+		<input type="checkbox" toggle checked disabled>
+		Server side cache. Stores frequently used files in memory.
 	</label>
 
 	<!--label fx-item>
@@ -172,7 +171,7 @@
 		<input flex type="text" value.bind="server.phpPath">
 	</label>
 
-	<p secondary>If you'd like to see support for more CGI powered scripting languages, report a bug or help with development, please chekc out Anchora's Gitub repo. Basic implementation of CGI interface is in place so help with testing it is welcomed.</p>
+	<p secondary>If you'd like to see support for more CGI powered scripting languages, report a bug or help with development, please check out Anchora's Gitub repo. Basic implementation of CGI interface is in place so help with testing it is welcomed.</p>
 
 
 

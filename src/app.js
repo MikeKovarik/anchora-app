@@ -25,10 +25,10 @@ export class AnchoraApp {
 		this.$tabs = document.querySelector('flexus-tabs')
 	}
 
-	constructor(bindingEngine, server) {
+	constructor(bindingEngine, anchoraBinding) {
 		window.scope = this
 
-		this.server = server
+		this.server = anchoraBinding
 
 		// Start listening to runtime errors and uncaught rejections.
 		this.logger = new Logger()
@@ -63,6 +63,10 @@ export class AnchoraApp {
 
 		this.buttonText = 'start'
 
+	}
+
+	attached() {
+		this.server.setupBinding()
 		//if (this.autoStart)
 		//	this.server.listen()
 	}
@@ -98,7 +102,6 @@ export class AnchoraApp {
 			this.buttonText = 'start'
 			this.logger.log('stopped')
 		}
-		this.server.listening = true
 		this.buttonDisabled = false
 	}
 
@@ -109,43 +112,4 @@ export class AnchoraApp {
 		localStorage.autoStart = newValue
 	}
 
-/*
-	@computedFrom('this.server.listening')
-	get running() {
-		return this.server.listening
-	}
-
-	get status() {
-		return this._status || 'stopped'
-	}
-	set status(newValue) {
-		this._status = newValue
-		this.updateStatusUi()
-	}
-
-	restart() {
-		if (this.running) {
-			this.stop()
-			this.status = 'restarting'
-			this.server.once('close', this._start)
-		}
-	}
-
-	start() {
-		this.status = 'starting'
-		this._start()
-	}
-	_start() {
-		this.server._root = this.root
-		this.server.listen()
-	}
-
-	stop() {
-		this.status = 'stopping'
-		this._stop()
-	}
-	_stop() {
-		this.server.close()
-	}
-*/
 }
