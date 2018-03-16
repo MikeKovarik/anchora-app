@@ -1,8 +1,10 @@
 import {computedFrom, observable, inject, BindingEngine} from 'aurelia-framework'
-import anchora from 'anchora'
+import anchora, {AnchoraServer} from 'anchora'
 import {Logger} from './logger'
-import {AnchoraBinding} from './AnchoraBinding'
+import {AnchoraBinding, LocalStorageBinding, LocalStorageProxy, localStored} from './Binding'
 
+
+window.anchora = anchora
 
 // TODO, future ideas
 // - Custom domains (edits hosts file, serves contet from different root)
@@ -18,25 +20,45 @@ if (window.nw) {
 	})
 }
 
-@inject(BindingEngine, AnchoraBinding)
+
+@inject(BindingEngine)
 export class AnchoraApp {
 
-	attached() {
-		this.$tabs = document.querySelector('flexus-tabs')
-	}
+	@localStored
+	autoStart = false
 
-	constructor(bindingEngine, anchoraBinding) {
+	constructor(bindingEngine) {
 		window.scope = this
-
-		this.server = anchoraBinding
 
 		// Start listening to runtime errors and uncaught rejections.
 		this.logger = new Logger()
 		// Focus Log tab whenever error occurs and gets printed into the log.
 		this.logger.onError = () => {
 			if (this.$tabs)
-				this.$tabs.selected = 1
+			this.$tabs.selected = 1
 		}
+
+		this.buttonText = 'start'
+
+		this.server = LocalStorageProxy(new AnchoraServer, {
+			https(newValue) {
+				if (newValue)
+					this.http2 = false
+			},
+			http2(newValue) {
+				if (newValue)
+					this.https = false
+			},
+			portUnsecure(newValue) {
+				console.log('portUnsecure', newValue, this)
+			},
+			portSecure(newValue) {
+				console.log('portSecure', newValue, this)
+			},
+		})
+/*		
+		this.server = anchoraBinding
+
 		// Also print out server's error events into the logs.
 		this.server.on('error', err => {
 			this.status = 'error'
@@ -48,68 +70,56 @@ export class AnchoraApp {
 			if (this.status !== 'restarting')
 				this.status = 'stopped'
 		})
-
-		// Hook into Anchora's logger. It uses 'debug' module by default
-		// but those messages could be rerouted to app's DOM logger.
-		/*bindingEngine
-			.propertyObserver(this.logger, 'format')
-			.subscribe(format => {
-				if (format === 'all')
-					anchora.changeDebugger(this.logger.log)
-				else
-					anchora.resetDebugger()
-			})
 */
 
-		this.buttonText = 'start'
+		this.server.setup()
 
 	}
 
+	// Bind input fields to localStorage and apply previously stored options.
+	// Note: needed to be done once attached to dom to be able to dynamically
+	// load all anchora's input fields (yup, I'm lazy to type it all out)
 	attached() {
-		this.server.setupBinding()
+		this.$tabs = document.querySelector('flexus-tabs')
+		// Load app settings from localStorage
+		new LocalStorageBinding(this, ['autoStart'])
+		// Load anchora server settings from localStorage
+		//new LocalStorageBinding(this.server, this.anchora)		
+		// Load anchora server settings from localStorage
+		new LocalStorageBinding(this.logger, ['format', 'includeStack', 'includeTimestamp'])
 		//if (this.autoStart)
 		//	this.server.listen()
 	}
 
 	async onButtonClick() {
-		if (this.https) {
-			if (!this.httpPort)
+		if (this.server.https) {
+			if (!this.server.portUnsecure)
 				throw new Error('Cannot start HTTP server: HTTP port not specified')
 		}
-		if (this.https || this.http2) {
-			if (!this.generateCerts && (!this.crtPath || !this.keyPath))
-				throw new Error('Cannot start HTTPS server: Certificate path not specified.')
-			if (!this.httpsPort)
+		if (this.server.https || this.server.http2) {
+			if (!this.server.portSecure)
 				throw new Error('Cannot start HTTPS server: HTTPS port not specified')
+			if (!this.server.generateCerts && (!this.server.crtPath || !this.server.keyPath))
+				throw new Error('Cannot start HTTPS server: Certificate path not specified.')
 		}
 
 		document.querySelector('flexus-tabs').selected = 1
 		this.buttonDisabled = true
-		if (this.buttonText === 'start') {
-			this.buttonText = 'starting'
-			this.logger.log('starting')
-		}
-		if (this.buttonText === 'stop') {
+		if (this.server.listening) {
+			console.log('await this.server.close()')
 			this.buttonText = 'stopping'
-			this.logger.log('stopping')
-		}
-		//await promiseTimeout(699)
-		if (this.buttonText === 'starting') {
-			this.buttonText = 'stop'
-			this.logger.log('running')
-		}
-		if (this.buttonText === 'stopping') {
+			await this.server.close()
 			this.buttonText = 'start'
-			this.logger.log('stopped')
+			console.log('await this.server.close() done')
+		} else {
+			console.log('await this.server.listen()')
+			this.buttonText = 'starting'
+			await this.server.listen()
+			this.buttonText = 'stop'
+			console.log('await this.server.listen() done')
 		}
 		this.buttonDisabled = false
-	}
 
-	@observable
-	autoStart = localStorage.autoStart === 'true'
-	autoStartChanged(newValue) {
-		console.log('autoStartChanged', newValue)
-		localStorage.autoStart = newValue
 	}
 
 }
