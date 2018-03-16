@@ -6,14 +6,16 @@
 	<link rel="stylesheet" type="text/css" href="node_modules/flexus/css/flexus-neon.css">
 	<link rel="stylesheet" type="text/css" href="node_modules/flexus/css/flexus-neon-icons.css">
 	<link rel="stylesheet" type="text/css" href="style/style.css">
+	<title>Anchora HTTP Server</title>
 </head>
 <body fx-app light accent="#42A5F5">
 
-	<flexus-titlebar no-push>
-		<div flex drag>Anchora: HTTP Static Server</div>
-		<button icon="win-minimize"></button>
-		<button icon="win-maximize"></button>
-		<button icon="win-close"></button>
+	<flexus-titlebar seamless>
+		<div flex drag>Anchora HTTP Server</div>
+		<button icon="chrome-minimize"></button>
+		<button icon="chrome-maximize"></button>
+		<button icon="chrome-unmaximize"></button>
+		<button icon="chrome-close"></button>
 	</flexus-titlebar>
 
 	<flexus-scene aurelia-app="config"></flexus-scene>
@@ -21,6 +23,7 @@
 	<!-- flexus ui framework -->
 	<script src="node_modules/flexus/lib/ganymede.js"></script>
 	<script src="node_modules/flexus/lib/flexus.js"></script>
+	<script src="node_modules/flexus/elements/titlebar.js"></script>
 	<!--script src="node_modules/flexus/elements/scene.js"></script>
 	<script src="node_modules/flexus/elements/view.js"></script-->
 	<script src="node_modules/flexus/elements/tabs.js"></script>
@@ -29,7 +32,51 @@
 	<script src="dist/bundle-vendor.js"></script>
 	<script src="dist/bundle-scripts.js"></script>
 	<script src="dist/bundle-templates.js"></script>
-	<script src="boot.js"></script>
+
+	<script>
+		SystemJS.config({
+			map: {
+				"fs": "@node/fs",
+				"url": "@node/url",
+				"path": "@node/path",
+				"util": "@node/util",
+				"http": "@node/http",
+				"https": "@node/https",
+				"http2": "@node/http2",
+				"buffer": "@node/buffer",
+				"events": "@node/events",
+				"stream": "@node/stream",
+				"zlib": "@node/zlib",
+				"child_process": "@node/child_process",
+			}
+		})
+
+		if (typeof global !== 'undefined') {
+			// Trying to get node_modules to load through systemjs (which was built for browsers)
+			// can cause serious trauma, madness and life crysis.
+			// Be like Mike. Don't give a fuck and just short circuit it. it works...
+			// Technically. This isn't even a hack.
+			System.set('anchora', System.newModule(global.require('anchora')))
+		} else {
+			// For when it's easier to quickly view the app from browser for UI tweaks.
+			var noop = () => {}
+			class AnchoraServer {
+				async setup() {}
+				listen() {}
+				close() {}
+				on() {}
+				emit() {}
+			}
+			System.set('anchora', System.newModule({
+				AnchoraServer,
+				createServer: () => new AnchoraServer,
+				changeDebugger: noop,
+				resetDebugger: noop,
+			}))
+		}
+
+		SystemJS.import('aurelia-bootstrapper').catch(console.error)
+	</script>
 
 </body>
 </html>

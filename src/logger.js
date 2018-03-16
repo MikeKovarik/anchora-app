@@ -1,6 +1,7 @@
 import {observable} from 'aurelia-framework'
 
 
+
 export class Logger {
 
 	list = []
@@ -73,7 +74,7 @@ export class Logger {
 			this._error(reason)
 		} else if (reason instanceof Error) {
 			if (this.includeStack)
-				this._error(reason.message + '\n' + reason.stack)
+				this._error(reason.message + '\n' + (reason.stack || ''))
 			else
 				this._error(reason.message)
 		} else {

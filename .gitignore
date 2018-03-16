@@ -64,3 +64,4 @@ dist/bundle-scripts.js.map
 dist/bundle-templates.js
 winblurbg/build
 winblurbg/node_modules
+build

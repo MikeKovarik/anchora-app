@@ -1,5 +1,6 @@
 <template>
 
+
 	<h4>General</h4>
 
 	<label fx-item>
@@ -86,17 +87,26 @@
 
 	<label fx-item>
 		<input type="radio" value="active" checked.bind="server.encoding">
-		Active mode: Compresses all files at the time of request.
+		<div two-line>
+			<div>Active mode</div>
+			<div secondary>Compresses all files at the time of request.</div>
+		</div>
 	</label>
 
 	<label fx-item>
 		<input type="radio" value="passive" checked.bind="server.encoding">
-		Passive mode: Tries to send pre-compressed .gz variants of files.
+		<div two-line>
+			<div>Passive mode</div>
+			<div secondary>Tries to send pre-compressed .gz variants of files.</div>
+		</div>
 	</label>
 
 	<label fx-item>
 		<input type="radio" value="false" checked.bind="server.encoding">
-		No compression. Files are server as are.
+		<div two-line>
+			<div>No compression</div>
+			<div secondary>Files are served without any compression.</div>
+		</div>
 	</label>
 <!--
 	<label fx-item>
@@ -136,18 +146,61 @@
 			Please insert paths to certificate to use for HTTPS.
 		</p>
 
-		<label fx-item>
+		<label vertical layout>
 			<div flex>.crt file path</div>
 			<input flex type="text">
 		</label>
 
-		<label fx-item>
+		<label vertical layout>
 			<div flex>.key file path</div>
 			<input flex type="text">
 		</label>
 
 	</fieldset>
 
+
+
+	<h4>HTTP2 Push Streams (experimental)</h4>
+
+	<p>TODO</p>
+
+	<label fx-item>
+		<input type="radio" value="aggresive" checked.bind="server.pushMode">
+		<div two-line>
+			<div>Aggresive</div>
+			<div secondary>Pushes everything, including images, audio, videos, etc..</div>
+		</div>
+	</label>
+
+	<label fx-item>
+		<input type="radio" value="optimized" checked.bind="server.pushMode">
+		<div two-line>
+			<div>Optimized</div>
+			<div secondary>Only pushes CSS, JS, JSON and HTML files</div>
+		</div>
+	</label>
+
+	<label fx-item>
+		<input type="radio" value="false" checked.bind="server.pushMode">
+		Disabled
+	</label>
+<!--
+	<label vertical layout>
+		<div flex>MIMEs to push</div>
+		<input flex type="text" value.bind="cacheMimes & array">
+	</label>
+-->
+
+
+	<!--
+	<h4>Headers</h4>
+	disable x-powered-by
+	<h4>Custom Headers</h4>
+	<dix fx-item repeat.for="header of obj | iterable">
+		<input type="text" value.bind="header.name">
+		<input type="text" value.bind="header.value">
+	</dix>
+	-->
 
 
 	<!--
@@ -164,14 +217,36 @@
 
 
 
-	<h4>PHP / CGI (Experimental)</h4>
+	<h4>CGI - PHP, Ruby, Perl (Experimental)</h4>
 
-	<label vertical layout class="two-line-input">
-		<span flex>Path to php-cgi.exe</span>
-		<input flex type="text" value.bind="server.phpPath">
+	<label fx-item>
+		<input type="checkbox" toggle checked.bind="server.cgi">
+		<div two-line>
+			<div>Enable execution of CGI scripts</div>
+			<div secondary>PHP, Ruby, Perl, etc...</div>
+		</div>
 	</label>
 
-	<p secondary>If you'd like to see support for more CGI powered scripting languages, report a bug or help with development, please check out Anchora's Gitub repo. Basic implementation of CGI interface is in place so help with testing it is welcomed.</p>
+	<fieldset show.bind="server.cgi">
+
+		<label vertical layout class="two-line-input">
+			<span flex>Path to php-cgi.exe</span>
+			<input flex type="text" value.bind="server.phpPath">
+		</label>
+
+		<label vertical layout class="two-line-input">
+			<span flex>Path to ruby cgi</span>
+			<input flex type="text" value.bind="server.rubyPath">
+		</label>
+
+		<label vertical layout class="two-line-input">
+			<span flex>Path to perl cgi</span>
+			<input flex type="text" value.bind="server.perlPath">
+		</label>
+
+		<p secondary>If you'd like to see support for more CGI powered scripting languages, report a bug or help with development, please check out Anchora's Gitub repo. Basic implementation of CGI interface is in place so help with testing it is welcomed.</p>
+
+	</fieldset>
 
 
 
@@ -181,12 +256,15 @@
 
 	<label fx-item>
 		<input type="radio" value="errors" checked.bind="logger.format">
-		Log only errors and warnings
+		Log errors and warnings
 	</label>
 
 	<label fx-item>
 		<input type="radio" value="all" checked.bind="logger.format">
-		Log everything (affects performance)
+		<div two-line>
+			<div>Log everything</div>
+			<div secondary>May affect performance</div>
+		</div>
 	</label>
 
 	<label fx-item>

@@ -7,13 +7,13 @@
 				<div two-line flex-1 nowrap>
 					<h5>HTTP Port</h5>
 					<input type="number"
-					value.bind="server.unsecurePort"
+					value.bind="server.portUnsecure & int"
 					disabled.bind="!server.unsecure">
 				</div>
 				<div two-line flex-1 nowrap>
 					<h5>HTTPS Port</h5>
 					<input type="number"
-					value.bind="server.securePort"
+					value.bind="server.portSecure & int"
 					disabled.bind="!server.secure">
 				</div>
 			</div>
@@ -24,19 +24,19 @@
 			<h5>Protocols</h5>
 			<div fx-item small-space>
 				<label layout left center flex>
-					<input type="checkbox" checked.bind="server.https">
-					HTTPS
-				</label>
-				<label layout left center flex>
 					<input type="checkbox" checked.bind="server.http">
 					HTTP
+				</label>
+				<label layout left center flex>
+					<input type="checkbox" checked.bind="server.https">
+					HTTPS
 				</label>
 			</div>
 
 			<div fx-item small-space>
 				<label layout left center flex title="Browsers only implement HTTP2 in secure mode. HTTP2 can never work on port 80.">
 					<input type="checkbox" checked.bind="server.http2">
-					HTTP/2.0
+					HTTP/2.0 (experimental)
 				</label>
 			</div>
 
