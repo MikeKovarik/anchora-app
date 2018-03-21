@@ -1,10 +1,10 @@
-import {computedFrom, observable, inject, BindingEngine} from 'aurelia-framework'
+import {computedFrom} from 'aurelia-framework'
 import anchora, {AnchoraServer} from 'anchora'
 import {Logger} from './logger'
-import {AnchoraBinding, LocalStorageBinding, LocalStorageProxy, localStored} from './Binding'
+import {LocalStorageProxy, localStored, observe} from './Binding'
 
 
-window.anchora = anchora
+window.anchora = anchora // todo deleteme
 
 // TODO, future ideas
 // - Custom domains (edits hosts file, serves contet from different root)
@@ -21,74 +21,37 @@ if (window.nw) {
 }
 
 
-@inject(BindingEngine)
 export class AnchoraApp {
 
-	@localStored
-	autoStart = false
-
-	constructor(bindingEngine) {
-		window.scope = this
+	constructor() {
+		window.scope = this // todo deleteme
 
 		// Start listening to runtime errors and uncaught rejections.
 		this.logger = new Logger()
 		// Focus Log tab whenever error occurs and gets printed into the log.
 		this.logger.onError = () => {
 			if (this.$tabs)
-			this.$tabs.selected = 1
+				this.$tabs.selected = 1
 		}
 
 		this.buttonText = 'start'
 
-		this.server = LocalStorageProxy(new AnchoraServer, {
-			https(newValue) {
-				if (newValue)
-					this.http2 = false
-			},
-			http2(newValue) {
-				if (newValue)
-					this.https = false
-			},
-			portUnsecure(newValue) {
-				console.log('portUnsecure', newValue, this)
-			},
-			portSecure(newValue) {
-				console.log('portSecure', newValue, this)
-			},
-		})
-/*		
-		this.server = anchoraBinding
+		this.server = LocalStorageProxy(new AnchoraServer)
 
 		// Also print out server's error events into the logs.
-		this.server.on('error', err => {
-			this.status = 'error'
-			this.logger.error(err)
-		})
+		this.server.on('error', this.logger.error)
 
-		this.server.on('listening', () => this.status = 'running')
 		this.server.on('close', () => {
-			if (this.status !== 'restarting')
-				this.status = 'stopped'
+			this.buttonDisabled = true
+			this.buttonText = 'start'
 		})
-*/
 
-		this.server.setup()
-
+		if (this.autoStart)
+			this.server.listen()
 	}
 
-	// Bind input fields to localStorage and apply previously stored options.
-	// Note: needed to be done once attached to dom to be able to dynamically
-	// load all anchora's input fields (yup, I'm lazy to type it all out)
 	attached() {
 		this.$tabs = document.querySelector('flexus-tabs')
-		// Load app settings from localStorage
-		new LocalStorageBinding(this, ['autoStart'])
-		// Load anchora server settings from localStorage
-		//new LocalStorageBinding(this.server, this.anchora)		
-		// Load anchora server settings from localStorage
-		new LocalStorageBinding(this.logger, ['format', 'includeStack', 'includeTimestamp'])
-		//if (this.autoStart)
-		//	this.server.listen()
 	}
 
 	async onButtonClick() {
@@ -106,20 +69,79 @@ export class AnchoraApp {
 		document.querySelector('flexus-tabs').selected = 1
 		this.buttonDisabled = true
 		if (this.server.listening) {
-			console.log('await this.server.close()')
 			this.buttonText = 'stopping'
 			await this.server.close()
 			this.buttonText = 'start'
-			console.log('await this.server.close() done')
 		} else {
-			console.log('await this.server.listen()')
 			this.buttonText = 'starting'
 			await this.server.listen()
 			this.buttonText = 'stop'
-			console.log('await this.server.listen() done')
 		}
 		this.buttonDisabled = false
 
+	}
+
+	@observe('server.http', 'server.https', 'server.http2', 'server.portUnsecure', 'server.portSecure')
+	reset() {
+		if (!this.server.listening) return
+		this.buttonDisabled = true
+		this.buttonText = 'updating'
+		clearInterval(this.resetTimeout)
+		this.resetTimeout = setTimeout(async () => {
+			await this.server.close()
+			//await this.server.listen()
+			this.buttonDisabled = false
+			this.buttonText = 'start'
+		})
+	}
+
+	@localStored
+	autoStart = false
+
+	@localStored
+	generateCerts = true
+	@observe('server.https')
+	onHttpsChanged(newValue) {
+		if (newValue)
+			this.server.http2 = false
+	}
+
+	@observe('server.http2')
+	onHttp2Changed(newValue) {
+		if (newValue)
+			this.server.https = false
+	}
+
+	@observe('server.allowUpgrade')
+	onAllowUpgradeChanged(allowUpgrade) {
+		console.log('### onAllowUpgradeChanged')
+		if (allowUpgrade === false)
+			this.server.forceUpgrade = false
+	}
+
+	@observe('server.forceUpgrade')
+	onforceUpgradeChanged(forceUpgrade) {
+		console.log('### onforceUpgradeChanged')
+		if (forceUpgrade === true)
+			this.server.allowUpgrade = true
+	}
+
+	@computedFrom('server.http')
+	get disableUnsecureServer() {
+		return !this.server.http
+	}
+
+	@computedFrom('server.https', 'server.http2')
+	get disableSecureServer() {
+		return !this.server.https && !this.server.http2
+	}
+
+	@computedFrom('server.cacheControl')
+	get clientCacheEnabled() {
+		if (!this.server.cacheControl) return true
+		var cc = this.server.cacheControl.toLowerCase().trim()
+		return cc !== 'no-cache'
+			&& cc !== 'max-age=0'
 	}
 
 }

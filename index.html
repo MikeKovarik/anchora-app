@@ -61,6 +61,10 @@
 			// For when it's easier to quickly view the app from browser for UI tweaks.
 			var noop = () => {}
 			class AnchoraServer {
+				constructor() {
+					this.portUnsecure = 80
+					this.portSecure = 443
+				}
 				async setup() {}
 				listen() {}
 				close() {}

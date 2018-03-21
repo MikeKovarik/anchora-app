@@ -87,13 +87,13 @@ flexus-view[master] {
 	from {transform: translate3d(0px, 10px, 0);}
 	to   {transform: translate3d(0px, 0px, 0);}
 }
+@keyframes slide-down {
+	from {transform: translate3d(0px, -10px, 0);}
+	to   {transform: translate3d(0px, 0px, 0);}
+}
 @keyframes slide-from-right {
 	from {transform: translate3d(10px, 0px, 0);}
 	to   {transform: translate3d(0px, 0px, 0);}
-}
-@keyframes fade-up {
-	from {opacity: 0; transform: translate3d(0px, 10px, 0);}
-	to   {opacity: 1; transform: translate3d(0px, 0px, 0);}
 }
 
 flexus-view[detail] {
@@ -140,5 +140,3 @@ flexus-view[detail] {
 .two-line-input {
 	margin: 10px 0 6px 0;
 }
-
-

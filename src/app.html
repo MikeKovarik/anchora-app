@@ -8,13 +8,13 @@
 					<h5>HTTP Port</h5>
 					<input type="number"
 					value.bind="server.portUnsecure & int"
-					disabled.bind="!server.unsecure">
+					disabled.bind="disableUnsecureServer">
 				</div>
 				<div two-line flex-1 nowrap>
 					<h5>HTTPS Port</h5>
 					<input type="number"
 					value.bind="server.portSecure & int"
-					disabled.bind="!server.secure">
+					disabled.bind="disableSecureServer">
 				</div>
 			</div>
 
@@ -36,7 +36,7 @@
 			<div fx-item small-space>
 				<label layout left center flex title="Browsers only implement HTTP2 in secure mode. HTTP2 can never work on port 80.">
 					<input type="checkbox" checked.bind="server.http2">
-					HTTP/2.0 (experimental)
+					HTTP/2 (experimental)
 				</label>
 			</div>
 
@@ -72,7 +72,7 @@
 		</flexus-tabs>
 
 		<flexus-pages>
-			<compose id="settings" narrow view="./settings.html"></compose>
+			<compose id="settings" view="./settings.html"></compose>
 			<compose id="log" view="./log.html"></compose>
 			<!--compose view="./custom-domains.html"></compose-->
 			<compose id="about" view="./about.html"></compose>

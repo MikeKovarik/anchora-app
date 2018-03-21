@@ -10,41 +10,144 @@
 
 
 
-	<h4>Caching</h4>
+	<h4>HTTPS</h4>
 
-	<label vertical layout class="two-line-input">
-		Cache-Control header
-		<input flex type="text" value.bind="server.cacheControl">
+	<label fx-item>
+		<input type="checkbox" toggle checked.bind="server.allowUpgrade">
+		Allow upgrading from HTTP to HTTPS if requested with Upgrade-Insecure-Requests header.
 	</label>
 
 	<label fx-item>
-		<input type="checkbox" toggle
-		disabled
-		checked.bind="server.clientCacheEnabled">
-		ETag header in response. It makes caching more efficient, and saves bandwidth.
+		<input type="checkbox" toggle checked.bind="server.forceUpgrade">
+		Force all insecure HTTP connections to upgrade to HTTPS.
 	</label>
 
 	<label fx-item>
-		<input type="checkbox" toggle
-		disabled
-		checked.bind="server.clientCacheEnabled">
-		Respond with 304 Not Modified instead of 200 OK if the file hasn't changed since caching.
+		<input type="checkbox" toggle checked.bind="generateCerts">
+		Generate and install self-signed certificate.
+	</label>
+
+	<h5 show.bind="!generateCerts">Custom Certificate</h5>
+	<fieldset show.bind="!generateCerts">
+
+		<p>Please define paths to certificate you would like to use in the HTTPS connections.</p>
+
+		<label vertical layout>
+			<div flex>.crt file path</div>
+			<input flex type="text">
+		</label>
+
+		<label vertical layout>
+			<div flex>.key file path</div>
+			<input flex type="text">
+		</label>
+
+	</fieldset>
+
+
+
+	<h4>HTTP/2 Push Streams (experimental)</h4>
+
+	<p>Allows server to send additional resouces (scripts, styles, images) to a web browser before the browser gets to request them.</p>
+
+	<h5>Push file types</h5>
+	<p secondary>Anchora parses requested files, extracts links of dependencies and tries to push them in parallel while serving the initial request. Dependency trees are cached and kept up to date.</p>
+
+	<label fx-item>
+		<input type="radio" value="aggresive" checked.bind="server.pushMode">
+		<div two-line>
+			<div>Aggresive</div>
+			<div secondary>Pushes everything, including images, audio, videos, etc..</div>
+		</div>
 	</label>
 
 	<label fx-item>
-		<input type="checkbox" toggle checked disabled>
-		Server side cache. Stores frequently used files in memory.
+		<input type="radio" value="optimized" checked.bind="server.pushMode">
+		<div two-line>
+			<div>Optimized</div>
+			<div secondary>Only pushes CSS, JS, JSON and HTML files</div>
+		</div>
 	</label>
 
-	<!--label fx-item>
-		<span flex>Cache memory size</span>
-		<input flex type="number">
-	</label-->
+	<label fx-item>
+		<input type="radio" value="false" checked.bind="server.pushMode">
+		Disabled
+	</label>
+<!--
+	<label vertical layout>
+		<div flex>MIMEs to push</div>
+		<input flex type="text" value.bind="cacheMimes & array">
+	</label>
+-->
+	<p secondary>This technology is still experimental on all fronts. Node's http2 module isn't stabilized yet, some browsers don't accept all incoming pushes (specifically: pushing es modules in chrome is buggy; urls with query strings don't work as expected) and Anchora might not be perfect either.</p>
 
-	<!--label fx-item>
-		<span flex>Max size of cached file</span>
-		<input flex type="number">
-	</label-->
+
+	<!--
+	<h4>Headers</h4>
+	disable x-powered-by
+	<h4>Custom Headers</h4>
+	<dix fx-item repeat.for="header of obj | iterable">
+		<input type="text" value.bind="header.name">
+		<input type="text" value.bind="header.value">
+	</dix>
+	-->
+
+
+	<!--
+	<h4>Custom MIME types</h4>
+	<div layout small-space>
+		<div flex-1>Extension</div>
+		<div flex-4 for="root">MIME</div>
+	</div>
+	<div layout small-space>
+		<input flex-1 type="text">
+		<input flex-4 type="text">
+	</div>
+	-->
+
+
+
+	<h4>Compression</h4>
+
+	<label fx-item>
+		<input type="radio" value="active" checked.bind="server.encoding">
+		<div two-line>
+			<div>Active mode</div>
+			<div secondary>Compresses all files at the time of request.</div>
+		</div>
+	</label>
+
+	<label fx-item>
+		<input type="radio" value="passive" checked.bind="server.encoding">
+		<div two-line>
+			<div>Passive mode</div>
+			<div secondary>Tries to send pre-compressed .gz variants of files.</div>
+		</div>
+	</label>
+
+	<label fx-item>
+		<input type="radio" value="false" checked.bind="server.encoding & bool">
+		<div two-line>
+			<div>No compression</div>
+			<div secondary>Files are served without any compression.</div>
+		</div>
+	</label>
+
+	<h5>Compressions algorithms</h5>
+	<p>Anchora currently supports GZip and Deflate.</p>
+<!--
+	<label fx-item>
+		<input type="checkbox"> GZip
+	</label>
+
+	<label fx-item>
+		<input type="checkbox"> Deflate
+	</label>
+
+	<label fx-item>
+		<input type="checkbox" disabled> Brotli
+	</label>
+-->
 
 
 
@@ -81,139 +184,52 @@
 
 
 
-	<h4>Compression</h4>
 
-	<p>Anchora currently supports GZip and Deflate.</p>
+	<h4>Caching</h4>
+
+	<label vertical layout class="two-line-input">
+		Cache-Control header
+		<input flex type="text" value.bind="server.cacheControl">
+	</label>
 
 	<label fx-item>
-		<input type="radio" value="active" checked.bind="server.encoding">
+		<input type="checkbox" toggle
+		disabled
+		checked.one-way="clientCacheEnabled">
 		<div two-line>
-			<div>Active mode</div>
-			<div secondary>Compresses all files at the time of request.</div>
+			<div>ETag header</div>
+			<div secondary>Makes caching more efficient, and saves bandwidth.</div>
 		</div>
 	</label>
 
 	<label fx-item>
-		<input type="radio" value="passive" checked.bind="server.encoding">
+		<input type="checkbox" toggle
+		disabled
+		checked.one-way="clientCacheEnabled">
 		<div two-line>
-			<div>Passive mode</div>
-			<div secondary>Tries to send pre-compressed .gz variants of files.</div>
+			<div>304 responses</div>
+			<div secondary>Respond with 304 Not Modified instead of 200 OK if the file hasn't changed since caching.</div>
 		</div>
 	</label>
 
 	<label fx-item>
-		<input type="radio" value="false" checked.bind="server.encoding">
+		<input type="checkbox" toggle checked disabled>
 		<div two-line>
-			<div>No compression</div>
-			<div secondary>Files are served without any compression.</div>
-		</div>
-	</label>
-<!--
-	<label fx-item>
-		<input type="checkbox"> GZip
-	</label>
-
-	<label fx-item>
-		<input type="checkbox"> Deflate
-	</label>
-
-	<label fx-item>
-		<input type="checkbox" disabled> Brotli
-	</label>
--->
-
-
-	<h4>HTTPS</h4>
-
-	<label fx-item>
-		<input type="checkbox" toggle checked.bind="server.allowUpgrade">
-		Allow upgrading from HTTP to HTTPS if requested with Upgrade-Insecure-Requests header.
-	</label>
-
-	<label fx-item>
-		<input type="checkbox" toggle checked.bind="server.forceUpgrade">
-		Force all insecure HTTP connections to upgrade to HTTPS by redirecting all HTTP requests.
-	</label>
-
-	<label fx-item>
-		<input type="checkbox" toggle checked.bind="generateCerts">
-		Generate and install self-signed certificate.
-	</label>
-
-	<fieldset show.bind="!generateCerts">
-
-		<p fx-item>
-			Please insert paths to certificate to use for HTTPS.
-		</p>
-
-		<label vertical layout>
-			<div flex>.crt file path</div>
-			<input flex type="text">
-		</label>
-
-		<label vertical layout>
-			<div flex>.key file path</div>
-			<input flex type="text">
-		</label>
-
-	</fieldset>
-
-
-
-	<h4>HTTP2 Push Streams (experimental)</h4>
-
-	<p>TODO</p>
-
-	<label fx-item>
-		<input type="radio" value="aggresive" checked.bind="server.pushMode">
-		<div two-line>
-			<div>Aggresive</div>
-			<div secondary>Pushes everything, including images, audio, videos, etc..</div>
+			<div>Sever side cache</div>
+			<div secondary>Keeps frequently used files in memory.</div>
 		</div>
 	</label>
 
-	<label fx-item>
-		<input type="radio" value="optimized" checked.bind="server.pushMode">
-		<div two-line>
-			<div>Optimized</div>
-			<div secondary>Only pushes CSS, JS, JSON and HTML files</div>
-		</div>
-	</label>
+	<!--label fx-item>
+		<span flex>Cache memory size</span>
+		<input flex type="number">
+	</label-->
 
-	<label fx-item>
-		<input type="radio" value="false" checked.bind="server.pushMode">
-		Disabled
-	</label>
-<!--
-	<label vertical layout>
-		<div flex>MIMEs to push</div>
-		<input flex type="text" value.bind="cacheMimes & array">
-	</label>
--->
+	<!--label fx-item>
+		<span flex>Max size of cached file</span>
+		<input flex type="number">
+	</label-->
 
-
-	<!--
-	<h4>Headers</h4>
-	disable x-powered-by
-	<h4>Custom Headers</h4>
-	<dix fx-item repeat.for="header of obj | iterable">
-		<input type="text" value.bind="header.name">
-		<input type="text" value.bind="header.value">
-	</dix>
-	-->
-
-
-	<!--
-	<h4>Custom MIME types</h4>
-	<div layout small-space>
-		<div flex-1>Extension</div>
-		<div flex-4 for="root">MIME</div>
-	</div>
-	<div layout small-space>
-		<input flex-1 type="text">
-		<input flex-4 type="text">
-	</div>
-	-->
 
 
 
@@ -229,6 +245,8 @@
 
 	<fieldset show.bind="server.cgi">
 
+		<p>Anchora does not come with PHP or any other language. But if you can install them and provide path to EXE files of the language's CGI interface.</p>
+		
 		<label vertical layout class="two-line-input">
 			<span flex>Path to php-cgi.exe</span>
 			<input flex type="text" value.bind="server.phpPath">

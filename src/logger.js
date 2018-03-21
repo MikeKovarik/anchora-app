@@ -1,14 +1,18 @@
 import {observable} from 'aurelia-framework'
-
+import {localStored} from './Binding'
 
 
 export class Logger {
 
 	list = []
 	
+	@localStored
 	includeStack = false
+
+	@localStored
 	includeTimestamp = true
 
+	@localStored
 	@observable
 	format = 'errors'
 
