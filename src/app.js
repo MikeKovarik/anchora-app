@@ -180,7 +180,17 @@ export class AnchoraApp {
 	@localStored
 	autoStart = false
 
+	@observable
 	@localStored
 	generateCerts = true
+	generateCertsChanged(generateCerts) {
+		if (generateCerts) {
+			this.server.certPath = this.defaultCertPath
+			this.server.keyPath  = this.defaultKeyPath
+		} else {
+			this.server.certPath = ''
+			this.server.keyPath  = ''
+		}
+	}
 
 }
