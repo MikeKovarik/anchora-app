@@ -8,13 +8,13 @@
 					<h5>HTTP Port</h5>
 					<input type="number"
 					value.bind="server.portUnsecure & int"
-					disabled.bind="disableUnsecureServer">
+					disabled.bind="!server.unsecure">
 				</div>
 				<div two-line flex-1 nowrap>
 					<h5>HTTPS Port</h5>
 					<input type="number"
 					value.bind="server.portSecure & int"
-					disabled.bind="disableSecureServer">
+					disabled.bind="!server.secure">
 				</div>
 			</div>
 
@@ -41,16 +41,16 @@
 			</div>
 
 			<button
-			disabled.bind="buttonDisabled"
-			css="color: ${buttonColor}"
+			disabled.bind="buttonText !== 'start' && buttonText !== 'stop'"
 			click.trigger="onButtonClick()">
 				${buttonText}
 			</button>
-
+			<!--
 			<div flex></div>
 
 			<div show.bind="server.listening" id="memory-meter">
 				<h5>In-Memory Cache</h5>
+				<p>TODO regularly fetch the value</p>
 				<div layout>
 					<span>${server.cache.memoryTaken} used</span>
 					<span flex></span>
@@ -58,7 +58,7 @@
 				</div>
 				<progress fullwidth value="22" max="100"></progress>
 			</div>
-
+			-->
 		</main>
 	</flexus-view>
 
@@ -73,7 +73,7 @@
 
 		<flexus-pages>
 			<compose id="settings" view="./settings.html"></compose>
-			<compose id="log" view="./log.html"></compose>
+			<compose id="log" ref="$log" view="./log.html"></compose>
 			<!--compose view="./custom-domains.html"></compose-->
 			<compose id="about" view="./about.html"></compose>
 		</flexus-pages>

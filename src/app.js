@@ -1,10 +1,9 @@
-import {computedFrom} from 'aurelia-framework'
+import path from 'path'
+import {computedFrom, inject, observable} from 'aurelia-framework'
 import anchora, {AnchoraServer} from 'anchora'
 import {Logger} from './logger'
-import {LocalStorageProxy, localStored, observe} from './Binding'
+import {LocalStorageBinding, localStored, observe} from './Binding'
 
-
-window.anchora = anchora // todo deleteme
 
 // TODO, future ideas
 // - Custom domains (edits hosts file, serves contet from different root)
@@ -21,33 +20,122 @@ if (window.nw) {
 }
 
 
+class Anchora extends LocalStorageBinding {
+
+	// Storing default certificate in %AppData%
+	// NOTE: Windows store apps don't have write permissions to cwd.
+	certDir = path.join(process.env.LOCALAPPDATA, 'anchora')
+
+	constructor() {
+		super()
+		this.target = new AnchoraServer
+		this.setupBinding()
+	}
+
+	@computedFrom('cacheControl')
+	get clientCacheEnabled() {
+		if (!this.cacheControl) return true
+		var cc = this.cacheControl.toLowerCase().trim()
+		return cc !== 'no-cache'
+			&& cc !== 'max-age=0'
+	}
+
+
+	@computedFrom('http')
+	get unsecure() {
+		return this.http
+	}
+
+	@computedFrom('https', 'http2')
+	get secure() {
+		return this.https || this.http2
+	}
+
+
+	@observable
+	https
+	httpsChanged(newValue) {
+		if (newValue)
+			this.http2 = false
+	}
+
+	@observable
+	http2
+	http2Changed(newValue) {
+		if (newValue)
+			this.https = false
+	}
+
+	@observable
+	allowUpgrade
+	allowUpgradeChanged(allowUpgrade) {
+		if (allowUpgrade === false)
+			this.forceUpgrade = false
+	}
+
+	@observable
+	forceUpgrade
+	forceUpgradeChanged(forceUpgrade) {
+		if (forceUpgrade === true)
+			this.allowUpgrade = true
+	}
+
+}
+
+
+
 export class AnchoraApp {
 
 	constructor() {
-		window.scope = this // todo deleteme
-
-		// Start listening to runtime errors and uncaught rejections.
-		this.logger = new Logger()
-		// Focus Log tab whenever error occurs and gets printed into the log.
-		this.logger.onError = () => {
-			if (this.$tabs)
-				this.$tabs.selected = 1
-		}
+		this.checkIfRunning = this.checkIfRunning.bind(this)
 
 		this.buttonText = 'start'
 
-		this.server = LocalStorageProxy(new AnchoraServer)
+		this.server = new Anchora
+
+		// Start listening to runtime errors and uncaught rejections (and hijacks console.* methods).
+		this.logger = new Logger
+		// Focus Log tab whenever error occurs and gets printed into the log.
+		this.logger.onError = () => {
+			this.scrollLog()
+			if (this.$tabs)
+				this.$tabs.selected = 1
+		}
+		// Keep scrolling to bottom of logger window with each log
+		this.logger.onLog = this.logger.onWarn = this.scrollLog.bind(this)
+		// Replace anchora's internal debug() method with our logger that pipes the logs into DOM.
+		this.changeDebugLogger()
 
 		// Also print out server's error events into the logs.
-		this.server.on('error', this.logger.error)
+		this.server.on('error', () => {
+			this.logger.error()
+			this.checkIfRunning()
+		})
 
 		this.server.on('close', () => {
-			this.buttonDisabled = true
 			this.buttonText = 'start'
 		})
 
 		if (this.autoStart)
 			this.server.listen()
+
+		// Server runs in another process and can't be observed so we're subjected to polling.
+		setInterval(this.checkIfRunning, 5000)
+
+	}
+
+	scrollLog() {
+		if (this.$log) {
+			this.$log.scrollTop = Number.MAX_SAFE_INTEGER
+			setTimeout(() => this.$log.scrollTop = Number.MAX_SAFE_INTEGER)
+		}
+	}
+
+	checkIfRunning() {
+		if (this.server.listening && this.buttonText !== 'stop')
+			this.buttonText = 'stop'
+		else if (!this.server.listening && this.buttonText !== 'start')
+			this.buttonText = 'start'
 	}
 
 	attached() {
@@ -55,19 +143,7 @@ export class AnchoraApp {
 	}
 
 	async onButtonClick() {
-		if (this.server.https) {
-			if (!this.server.portUnsecure)
-				throw new Error('Cannot start HTTP server: HTTP port not specified')
-		}
-		if (this.server.https || this.server.http2) {
-			if (!this.server.portSecure)
-				throw new Error('Cannot start HTTPS server: HTTPS port not specified')
-			if (!this.server.generateCerts && (!this.server.crtPath || !this.server.keyPath))
-				throw new Error('Cannot start HTTPS server: Certificate path not specified.')
-		}
-
 		document.querySelector('flexus-tabs').selected = 1
-		this.buttonDisabled = true
 		if (this.server.listening) {
 			this.buttonText = 'stopping'
 			await this.server.close()
@@ -77,22 +153,28 @@ export class AnchoraApp {
 			await this.server.listen()
 			this.buttonText = 'stop'
 		}
-		this.buttonDisabled = false
 
 	}
 
 	@observe('server.http', 'server.https', 'server.http2', 'server.portUnsecure', 'server.portSecure')
 	reset() {
 		if (!this.server.listening) return
-		this.buttonDisabled = true
-		this.buttonText = 'updating'
+		this.buttonText = 'restarting'
 		clearInterval(this.resetTimeout)
 		this.resetTimeout = setTimeout(async () => {
 			await this.server.close()
-			//await this.server.listen()
-			this.buttonDisabled = false
-			this.buttonText = 'start'
+			this.buttonText = 'starting'
+			await this.server.listen()
+			this.buttonText = 'stop'
 		})
+	}
+
+	@observe('logger.format')
+	changeDebugLogger() {
+		if (this.logger.format === 'all')
+			anchora.changeDebugger(this.logger.log)
+		else
+			anchora.resetDebugger()
 	}
 
 	@localStored
@@ -100,48 +182,5 @@ export class AnchoraApp {
 
 	@localStored
 	generateCerts = true
-	@observe('server.https')
-	onHttpsChanged(newValue) {
-		if (newValue)
-			this.server.http2 = false
-	}
-
-	@observe('server.http2')
-	onHttp2Changed(newValue) {
-		if (newValue)
-			this.server.https = false
-	}
-
-	@observe('server.allowUpgrade')
-	onAllowUpgradeChanged(allowUpgrade) {
-		console.log('### onAllowUpgradeChanged')
-		if (allowUpgrade === false)
-			this.server.forceUpgrade = false
-	}
-
-	@observe('server.forceUpgrade')
-	onforceUpgradeChanged(forceUpgrade) {
-		console.log('### onforceUpgradeChanged')
-		if (forceUpgrade === true)
-			this.server.allowUpgrade = true
-	}
-
-	@computedFrom('server.http')
-	get disableUnsecureServer() {
-		return !this.server.http
-	}
-
-	@computedFrom('server.https', 'server.http2')
-	get disableSecureServer() {
-		return !this.server.https && !this.server.http2
-	}
-
-	@computedFrom('server.cacheControl')
-	get clientCacheEnabled() {
-		if (!this.server.cacheControl) return true
-		var cc = this.server.cacheControl.toLowerCase().trim()
-		return cc !== 'no-cache'
-			&& cc !== 'max-age=0'
-	}
 
 }

@@ -12,7 +12,7 @@
     "build": "gulp",
     "run": "c:\\nwjs-sdk\\nw.exe ."
   },
-  "main": "index.html",
+  "main": "background.js",
   "dependencies": {
     "anchora": "0.0.1",
     "aurelia-bootstrapper": "^2.1.1",

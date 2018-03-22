@@ -24,7 +24,7 @@ function retrieveValue(storageName, defaultValue) {
 export function localStored(proto, name, descriptor) {
 	var {enumerable, initializer} = descriptor
 	var className = proto.constructor.name
-	var hiddenName = '_' + name
+	var hiddenName = `_${name}`
 	var storageName = `${className}.${name}`
 	var defaultValue = initializer && initializer()
 	var value = retrieveValue(storageName, defaultValue)
@@ -54,33 +54,71 @@ export function localStored(proto, name, descriptor) {
 	}
 
 	initGetter.dependencies = get.dependencies = [hiddenName]
-	return {enumerable, get: initGetter, initSetter}
+	return {enumerable, get: initGetter, set: initSetter}
 }
 
 
-export function LocalStorageProxy(target) {
-	var className = target.constructor.name
 
-	var proxy = new Proxy(target, {
+export class LocalStorageBinding {
 
-		get(target, name) {
-			if (name === '__observers__')
-				return target[name]
-			if (typeof target[name] === 'function')
-				return target[name].bind(target)
-			return retrieveValue(`${className}.${name}`, target[name])
-		},
+	setupBinding() {
+		var target = this.target
+		var className = this.constructor.name
+		var proto = target.constructor.prototype
 
-		set(target, name, newValue) {
-			target[name] = newValue
-			localStorage[`${className}.${name}`] = newValue
-			return true
+		var propertyNames = Object.keys(target)
+		var methodNames = []
+
+		var protoDesc = Object.getOwnPropertyDescriptors(proto)
+		for (let [name, descriptor] of Object.entries(protoDesc)) {
+			if (descriptor.get) {
+				Object.defineProperty(this, name, {
+					get() {
+						return target[name]
+					},
+					set(newValue) {target[name] = newValue},
+				})
+			} else {
+				methodNames.push(name)
+			}
 		}
 
-	})
+		for (let name of methodNames) {
+			if (name !== 'constructor')
+				this[name] = (...args) => target[name](...args)
+		}
 
-	return proxy
+		for (let storageName of Object.keys(localStorage)) {
+			if (!storageName.startsWith(`${className}.`))
+				continue
+			let name = storageName.split('.')[1]
+			if (!propertyNames.includes(name))
+				propertyNames.push(name)
+		}
+		
+		for (let name of propertyNames) {
+			let type = typeof target[name]
+			if (type === 'function' || type === 'object')
+				continue
+			let defaultValue = this[name]
+			if (defaultValue === undefined)
+				defaultValue = target[name]
+			let storageName = `${className}.${name}`
+			let currentValue = retrieveValue(storageName, defaultValue)
+			// Propagate custom settings back into anchora module.
+			target[name] = this[name] = currentValue
+			// Start listening for changes on this property and apply new value into anchora server.
+			bindingEngine
+				.propertyObserver(this, name)
+				.subscribe(newValue => {
+					localStorage[storageName] = newValue
+					target[name] = newValue
+				})
+		}
+	}
+
 }
+
 
 
 

@@ -70,7 +70,7 @@
 	</label>
 
 	<label fx-item>
-		<input type="radio" value="false" checked.bind="server.pushMode">
+		<input type="radio" value="false" checked.bind="server.pushMode & bool">
 		Disabled
 	</label>
 <!--
@@ -273,7 +273,7 @@
 	<p>This is a developer's territory. You probably don't need to change anything here.</p>
 
 	<label fx-item>
-		<input type="radio" value="errors" checked.bind="logger.format">
+		<input type="radio" value="debug" checked.bind="logger.format">
 		Log errors and warnings
 	</label>
 

@@ -121,6 +121,7 @@ flexus-view[detail] {
 	font-size: 14px;
 	font-family: monospace;
 	white-space: pre-line;
+	word-break: break-word;
 }
 	#log > .log-line {
 		margin: 0;
