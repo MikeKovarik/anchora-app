@@ -1,3 +1,4 @@
+import fs from 'fs'
 import path from 'path'
 import {computedFrom, inject, observable} from 'aurelia-framework'
 import anchora, {AnchoraServer} from 'anchora'
@@ -8,6 +9,7 @@ import {LocalStorageBinding, localStored, observe} from './Binding'
 // TODO, future ideas
 // - Custom domains (edits hosts file, serves contet from different root)
 // - Launch from context menu - Right click in folder "host this folder"
+// - Add markdown rendering (maybe even code beautifying and highlighting)
 
 // TODO: doesnt work again
 if (window.nw) {
@@ -87,9 +89,12 @@ class Anchora extends LocalStorageBinding {
 export class AnchoraApp {
 
 	constructor() {
+		window.scope = this // todo deleteme
 		this.checkIfRunning = this.checkIfRunning.bind(this)
 
 		this.buttonText = 'start'
+
+		this.checkRootExistence()
 
 		this.server = new Anchora
 
@@ -103,6 +108,11 @@ export class AnchoraApp {
 		}
 		// Keep scrolling to bottom of logger window with each log
 		this.logger.onLog = this.logger.onWarn = this.scrollLog.bind(this)
+		// Make sure to hide the annoying htt2 warning.
+		this.logger.onBeforeError = this.logger.onBeforeWarn = item => {
+			if (item.message.includes('http2 module is an experimental API'))
+				return false
+		}
 		// Replace anchora's internal debug() method with our logger that pipes the logs into DOM.
 		this.changeDebugLogger()
 
@@ -157,15 +167,30 @@ export class AnchoraApp {
 	}
 
 	@observe('server.http', 'server.https', 'server.http2', 'server.portUnsecure', 'server.portSecure')
+	@debounce(300)
 	reset() {
 		if (!this.server.listening) return
 		this.buttonText = 'restarting'
-		clearInterval(this.resetTimeout)
+		clearTimeout(this.resetTimeout)
 		this.resetTimeout = setTimeout(async () => {
 			await this.server.close()
 			this.buttonText = 'starting'
 			await this.server.listen()
 			this.buttonText = 'stop'
+		})
+	}
+
+	@observe('server.root')
+	@debounce(300)
+	checkRootExistence() {
+		clearTimeout(this.checkRootTimeout)
+		this.checkRootTimeout = setTimeout(async () => {
+			try {
+				await fs.stat(this.server.root)
+				this.$root.setCustomValidity('')
+			} catch(err) {
+				this.$root.setCustomValidity(`Directory doesn't exist`)
+			}
 		})
 	}
 
@@ -193,4 +218,32 @@ export class AnchoraApp {
 		}
 	}
 
+}
+
+function debounce(...args) {
+	if (args.length === 3)
+		return _debounce(...args)
+	return (...args2) => _debounce(...args2, args[0])
+}
+
+function _debounce(proto, methodName, descriptor, millis = 0) {
+	var enumerable = descriptor.enumerable
+	return {
+		configurable: true,
+		enumerable,
+		get() {
+			var id
+			var method = descriptor.value
+			var debounced = (...args) => {
+				clearTimeout(id)
+				id = setTimeout(() => method.apply(this, args), millis)
+			}
+			Object.defineProperty(this, methodName, {
+				configurable: true,
+				enumerable,
+				value: debounced
+			})
+			return debounced
+		}
+	}
 }

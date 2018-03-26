@@ -7,19 +7,21 @@
 				<div two-line flex-1 nowrap>
 					<h5>HTTP Port</h5>
 					<input type="number"
+					ref="$unsecure"
 					value.bind="server.portUnsecure & int"
 					disabled.bind="!server.unsecure">
 				</div>
 				<div two-line flex-1 nowrap>
 					<h5>HTTPS Port</h5>
 					<input type="number"
+					ref="$secure"
 					value.bind="server.portSecure & int"
 					disabled.bind="!server.secure">
 				</div>
 			</div>
 
 			<h5>Root</h5>
-			<input type="text" value.bind="server.root">
+			<input type="text" value.bind="server.root" ref="$root">
 
 			<h5>Protocols</h5>
 			<div fx-item small-space>
@@ -66,15 +68,17 @@
 
 		<flexus-tabs subtle>
 			<div>Settings</div>
-			<div>Log</div>
+			<!--div>Extensions</div-->
 			<!--div>Domains</div-->
+			<div>Log</div>
 			<div>About</div>
 		</flexus-tabs>
 
 		<flexus-pages>
 			<compose id="settings" view="./settings.html"></compose>
+			<!--compose id="settings" view="./settings-extensions.html"></compose-->
+			<!--compose view="./settings-hosts.html"></compose-->
 			<compose id="log" ref="$log" view="./log.html"></compose>
-			<!--compose view="./custom-domains.html"></compose-->
 			<compose id="about" view="./about.html"></compose>
 		</flexus-pages>
 

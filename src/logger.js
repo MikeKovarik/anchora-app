@@ -2,6 +2,7 @@ import {observable} from 'aurelia-framework'
 import {localStored} from './Binding'
 
 
+var isBrowser = typeof navigator !== 'undefined'
 var isNode = typeof global !== 'undefined'
 
 function stringify(data) {
@@ -31,11 +32,12 @@ export class Logger {
 	@observable
 	format = 'errors'
 
-	constructor(app) {
+	constructor() {
 
 		this.log = this.log.bind(this)
 		this.warn = this.warn.bind(this)
 		this.error = this.error.bind(this)
+		this.handleWarning = this.handleWarning.bind(this)
 
 		// Tap into console.log and console.error
 		this.originalLog = console._log = console.log.bind(console)
@@ -44,40 +46,41 @@ export class Logger {
 
 		// Handle Node errors
 		if (typeof process !== 'undefined') {
+			var nodeConsole = this.nodeConsole = global.console
+			nodeConsole._log = nodeConsole.log.bind(nodeConsole)
+			nodeConsole._warn = nodeConsole.warn.bind(nodeConsole)
+			nodeConsole._error = nodeConsole.error.bind(nodeConsole)
 			process.on('unhandledRejection', reason => {
 				// Stringify the error and push it out.
-				this._handleUnhandledRejection(reason)
+				this.handleError(reason)
 				// Log the full unchanged error object to console with default console.error
 				this.originalError('NODE unhandledRejection:', reason)
 			})
 			process.on('uncaughtException', reason => {
 				// Stringify the error and push it out.
-				this._handleUnhandledRejection(reason)
+				this.handleError(reason)
 				// Log the full unchanged error object to console with default console.error
 				this.originalError('NODE uncaughtException:', reason)
 			})
-			var nodeConsole = this.nodeConsole = global.console
-			nodeConsole._log = nodeConsole.log.bind(nodeConsole)
-			nodeConsole._warn = nodeConsole.warn.bind(nodeConsole)
-			nodeConsole._error = nodeConsole.error.bind(nodeConsole)
+			process.on('warning', this.handleWarning)
 		}
 
 		// Handle browser uncaught rejections.
 		if (typeof window !== 'undefined') {
+			var browserConsole = this.browserConsole = window.console
+			browserConsole._log = browserConsole.log.bind(browserConsole)
+			browserConsole._warn = browserConsole.warn.bind(browserConsole)
+			browserConsole._error = browserConsole.error.bind(browserConsole)
 			window.addEventListener('unhandledrejection', event => {
 				// Error's reason can be a bit tricky to find, depending what caused it.
 				var reason = event.reason || event.detail && event.detail.reason
 				// Prevent error output on the console:
 				event.preventDefault()
 				// Stringify the error and push it out.
-				this._handleUnhandledRejection(reason)
+				this.handleError(reason)
 				// Log the full unchanged error object to console with default console.error
 				this.originalError('BROWSER unhandledrejection:', reason)
 			})
-			var browserConsole = this.browserConsole = window.console
-			browserConsole._log = browserConsole.log.bind(browserConsole)
-			browserConsole._warn = browserConsole.warn.bind(browserConsole)
-			browserConsole._error = browserConsole.error.bind(browserConsole)
 		}
 
 		this.formatChanged()
@@ -122,21 +125,6 @@ export class Logger {
 		}
 	}
 
-	_handleUnhandledRejection(reason) {
-		// WARNING: Can't do 'reason instanceof Error' because error's from node's context don't
-		// use the same Error object. Name comparison is the only safe way
-		if (typeof reason === 'string') {
-			this._error(reason)
-		} else if (reason.constructor.name === 'Error') {
-			if (this.includeStack)
-				this._error(reason.message + '\n' + (reason.stack || ''))
-			else
-				this._error(reason.message)
-		} else {
-			this._error(JSON.stringify(reason))
-		}
-	}
-
 	_getTimestamp() {
 		var date = new Date()
 		return date.getHours().toString().padStart(2, '0')
@@ -144,8 +132,8 @@ export class Logger {
 		+ ':' + date.getSeconds().toString().padStart(2, '0')
 	}
 
-	_getLogMessage(args) {
-		return args.map(stringify).join(', ')
+	_stringifyLogArguments(args) {
+		return args.map(stringify).join(' ').trim()
 	}
 
 	log(...args) {
@@ -153,9 +141,12 @@ export class Logger {
 			this.browserConsole._log(...args)
 		if (this.nodeConsole)
 			this.nodeConsole._log(...args)
+		this._createLog(this._stringifyLogArguments(args))
+	}
+	_createLog(message) {
 		this.list.push({
 			timestamp: this._getTimestamp(),
-			message: this._getLogMessage(args),
+			message,
 		})
 		if (this.onLog)
 			this.onLog()
@@ -166,13 +157,20 @@ export class Logger {
 			this.browserConsole._warn(...args)
 		if (this.nodeConsole)
 			this.nodeConsole._warn(...args)
-		this.list.push({
+		this._createWarning(this._stringifyLogArguments(args))
+	}
+	_createWarning(message) {
+		var item = {
 			color: 'orange',
 			timestamp: this._getTimestamp(),
-			message: this._getLogMessage(args),
-		})
+			message,
+		}
+		if (this.onBeforeWarn)
+			if (this.onBeforeWarn(item) === false)
+				return
+		this.list.push(item)
 		if (this.onWarn)
-			this.onWarn()
+			this.onWarn(item)
 	}
 
 	error(...args) {
@@ -180,16 +178,39 @@ export class Logger {
 			this.browserConsole._error(...args)
 		if (this.nodeConsole)
 			this.nodeConsole._error(...args)
-		this._error(this._getLogMessage(args))
+		this._createError(this._stringifyLogArguments(args))
 	}
-	_error(message) {
-		this.list.push({
+	_createError(message) {
+		var item = {
 			color: 'red',
 			timestamp: this._getTimestamp(),
 			message,
-		})
+		}
+		if (this.onBeforeError)
+			if (this.onBeforeError(item) === false)
+				return
+		this.list.push(item)
 		if (this.onError)
-			this.onError()
+			this.onError(item)
+	}
+
+	_handleErrorLikeObject(object) {
+		if (typeof object === 'string') {
+			return object
+		} else if ((isBrowser && object instanceof window.Error) || isNode && object instanceof global.Error) {
+			if (this.includeStack)
+				return object.message + '\n' + (object.stack || '')
+			else
+				return object.message
+		} else {
+			return JSON.stringify(object)
+		}
+	}
+	handleError(error) {
+		this._createError(this._handleErrorLikeObject(error))
+	}
+	handleWarning(warning) {
+		this._createWarning(this._handleErrorLikeObject(warning))
 	}
 
 }

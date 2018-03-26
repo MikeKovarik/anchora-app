@@ -61,7 +61,7 @@
 		</div>
 	</label>
 
-	<label fx-item>
+	<label fx-item top>
 		<input type="radio" value="optimized" checked.bind="server.pushMode">
 		<div two-line>
 			<div>Optimized</div>
@@ -109,7 +109,7 @@
 
 	<h4>Compression</h4>
 
-	<label fx-item>
+	<label fx-item top>
 		<input type="radio" value="active" checked.bind="server.encoding">
 		<div two-line>
 			<div>Active mode</div>
@@ -117,7 +117,7 @@
 		</div>
 	</label>
 
-	<label fx-item>
+	<label fx-item top>
 		<input type="radio" value="passive" checked.bind="server.encoding">
 		<div two-line>
 			<div>Passive mode</div>
@@ -125,7 +125,7 @@
 		</div>
 	</label>
 
-	<label fx-item>
+	<label fx-item top>
 		<input type="radio" value="false" checked.bind="server.encoding & bool">
 		<div two-line>
 			<div>No compression</div>
@@ -233,38 +233,7 @@
 
 
 
-	<h4>CGI - PHP, Ruby, Perl (Experimental)</h4>
-
-	<label fx-item>
-		<input type="checkbox" toggle checked.bind="server.cgi">
-		<div two-line>
-			<div>Enable execution of CGI scripts</div>
-			<div secondary>PHP, Ruby, Perl, etc...</div>
-		</div>
-	</label>
-
-	<fieldset show.bind="server.cgi">
-
-		<p>Anchora does not come with PHP or any other language. But if you can install them and provide path to EXE files of the language's CGI interface.</p>
-		
-		<label vertical layout class="two-line-input">
-			<span flex>Path to php-cgi.exe</span>
-			<input flex type="text" value.bind="server.phpPath">
-		</label>
-
-		<label vertical layout class="two-line-input">
-			<span flex>Path to ruby cgi</span>
-			<input flex type="text" value.bind="server.rubyPath">
-		</label>
-
-		<label vertical layout class="two-line-input">
-			<span flex>Path to perl cgi</span>
-			<input flex type="text" value.bind="server.perlPath">
-		</label>
-
-		<p secondary>If you'd like to see support for more CGI powered scripting languages, report a bug or help with development, please check out Anchora's Gitub repo. Basic implementation of CGI interface is in place so help with testing it is welcomed.</p>
-
-	</fieldset>
+	<compose view="./settings-extensions.html" containerless></compose>
 
 
 

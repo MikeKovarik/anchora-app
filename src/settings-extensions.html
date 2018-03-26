@@ -1,0 +1,48 @@
+<template>
+
+<!--
+
+	<h4>Markdown</h4>
+
+	<p>Render .md and .markdown files as HTML page with GitHub flavored CSS instead of displaying it as plain text.</p>
+	<label fx-item>
+		<input type="checkbox" toggle checked.bind="enableMarkdown">
+		<span>${enableMarkdown ? 'On' : 'Off'}</span>
+	</label>
+	
+	
+-->
+
+	<h4>CGI - PHP, Ruby, Perl (Experimental)</h4>
+
+	<p>Enable execution of PHP, Ruby and Perl scripts through CGI Interface.</p>
+	<label fx-item>
+		<input type="checkbox" toggle checked.bind="server.cgi">
+		<span>${server.cgi ? 'On' : 'Off'}</span>
+	</label>
+
+	<fieldset show.bind="server.cgi">
+
+		<p>Anchora does not come with PHP or any other language. But if you can install them and provide path to EXE files of the language's CGI interface.</p>
+		
+		<label vertical layout class="two-line-input">
+			<span flex>Path to php-cgi.exe</span>
+			<input flex type="text" value.bind="server.phpPath">
+		</label>
+
+		<label vertical layout class="two-line-input">
+			<span flex>Path to ruby cgi</span>
+			<input flex type="text" value.bind="server.rubyPath">
+		</label>
+
+		<label vertical layout class="two-line-input">
+			<span flex>Path to perl cgi</span>
+			<input flex type="text" value.bind="server.perlPath">
+		</label>
+
+		<p secondary>If you'd like to see support for more CGI powered scripting languages, report a bug or help with development, please check out Anchora's Gitub repo. Basic implementation of CGI interface is in place so help with testing it is welcomed.</p>
+
+	</fieldset>
+
+
+</template>
