@@ -1,0 +1,43 @@
+<template>
+
+
+	<h4>General</h4>
+
+	<label fx-item>
+		<input type="checkbox" toggle checked.bind="autoStart">
+		Start the server on app's launch
+	</label>
+
+
+	<compose view="./settings-extensions.html" containerless></compose>
+
+
+	<h4>Logging</h4>
+
+	<p>This is a developer's territory. You probably don't need to change anything here.</p>
+
+	<label fx-item>
+		<input type="radio" value="debug" checked.bind="logger.format">
+		Log errors and warnings
+	</label>
+
+	<label fx-item>
+		<input type="radio" value="all" checked.bind="logger.format">
+		<div two-line>
+			<div>Log everything</div>
+			<div secondary>May affect performance</div>
+		</div>
+	</label>
+
+	<label fx-item>
+		<input type="checkbox" checked.bind="logger.includeTimestamp">
+		Include timestamps
+	</label>
+
+	<label fx-item>
+		<input type="checkbox" checked.bind="logger.includeStack">
+		Include stack trace
+	</label>
+
+
+</template>

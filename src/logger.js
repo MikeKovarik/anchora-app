@@ -1,5 +1,5 @@
 import {observable} from 'aurelia-framework'
-import {localStored} from './Binding'
+import {localStored} from './binding'
 
 
 var isBrowser = typeof navigator !== 'undefined'

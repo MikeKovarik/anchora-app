@@ -3,7 +3,7 @@ import path from 'path'
 import {computedFrom, inject, observable} from 'aurelia-framework'
 import anchora, {AnchoraServer} from 'anchora'
 import {Logger} from './logger'
-import {LocalStorageBinding, localStored, observe} from './Binding'
+import {LocalStorageBinding, localStored, observe} from './binding'
 import pkg from 'package.json'
 
 
