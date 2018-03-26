@@ -4,12 +4,14 @@ import {computedFrom, inject, observable} from 'aurelia-framework'
 import anchora, {AnchoraServer} from 'anchora'
 import {Logger} from './logger'
 import {LocalStorageBinding, localStored, observe} from './Binding'
+import pkg from 'package.json'
 
 
 // TODO, future ideas
 // - Custom domains (edits hosts file, serves contet from different root)
 // - Launch from context menu - Right click in folder "host this folder"
 // - Add markdown rendering (maybe even code beautifying and highlighting)
+// - Cache memory indicator
 
 // TODO: doesnt work again
 if (window.nw) {
@@ -26,10 +28,11 @@ class Anchora extends LocalStorageBinding {
 
 	// Storing default certificate in %AppData%
 	// NOTE: Windows store apps don't have write permissions to cwd.
-	certDir = path.join(process.env.LOCALAPPDATA, 'anchora')
+	certDir = path.join(process.env.LOCALAPPDATA, pkg.name)
 
 	constructor() {
 		super()
+		console.log('this.certDir', this.certDir)
 		this.target = new AnchoraServer
 		this.setupBinding()
 	}
@@ -89,6 +92,7 @@ class Anchora extends LocalStorageBinding {
 export class AnchoraApp {
 
 	constructor() {
+		console.log('generateCerts', this.generateCerts)
 		window.scope = this // todo deleteme
 		this.checkIfRunning = this.checkIfRunning.bind(this)
 
@@ -101,11 +105,7 @@ export class AnchoraApp {
 		// Start listening to runtime errors and uncaught rejections (and hijacks console.* methods).
 		this.logger = new Logger
 		// Focus Log tab whenever error occurs and gets printed into the log.
-		this.logger.onError = () => {
-			this.scrollLog()
-			if (this.$tabs)
-				this.$tabs.selected = 1
-		}
+		this.logger.onError = this.openLog.bind(this)
 		// Keep scrolling to bottom of logger window with each log
 		this.logger.onLog = this.logger.onWarn = this.scrollLog.bind(this)
 		// Make sure to hide the annoying htt2 warning.
@@ -134,6 +134,13 @@ export class AnchoraApp {
 
 	}
 
+	openLog() {
+		if (this.$tabs && this.$log) {
+			var logIndex = Array.from(this.$log.parentElement.children).indexOf(this.$log)
+			this.$tabs.selected = logIndex
+			this.scrollLog()
+		}
+	}
 	scrollLog() {
 		if (this.$log) {
 			this.$log.scrollTop = Number.MAX_SAFE_INTEGER
@@ -153,7 +160,7 @@ export class AnchoraApp {
 	}
 
 	async onButtonClick() {
-		document.querySelector('flexus-tabs').selected = 1
+		this.openLog()
 		if (this.server.listening) {
 			this.buttonText = 'stopping'
 			await this.server.close()
@@ -168,30 +175,26 @@ export class AnchoraApp {
 
 	@observe('server.http', 'server.https', 'server.http2', 'server.portUnsecure', 'server.portSecure')
 	@debounce(300)
-	reset() {
+	async reset() {
 		if (!this.server.listening) return
 		this.buttonText = 'restarting'
-		clearTimeout(this.resetTimeout)
-		this.resetTimeout = setTimeout(async () => {
-			await this.server.close()
-			this.buttonText = 'starting'
-			await this.server.listen()
-			this.buttonText = 'stop'
-		})
+		await this.server.close()
+		await this.server.listen()
+		this.buttonText = 'stop'
 	}
 
 	@observe('server.root')
-	@debounce(300)
-	checkRootExistence() {
-		clearTimeout(this.checkRootTimeout)
-		this.checkRootTimeout = setTimeout(async () => {
-			try {
-				await fs.stat(this.server.root)
-				this.$root.setCustomValidity('')
-			} catch(err) {
-				this.$root.setCustomValidity(`Directory doesn't exist`)
-			}
-		})
+	@debounce(400)
+	async checkRootExistence() {
+		try {
+			await fs.stat(this.server.root)
+			this.$root.setCustomValidity('')
+		} catch(err) {
+			this.$root.setCustomValidity(`Directory doesn't exist`)
+		}
+	}
+	resetRootInvalidity() {
+		this.$root.setCustomValidity('')
 	}
 
 	@observe('logger.format')
@@ -205,8 +208,8 @@ export class AnchoraApp {
 	@localStored
 	autoStart = false
 
-	@observable
 	@localStored
+	@observable
 	generateCerts = true
 	generateCertsChanged(generateCerts) {
 		if (generateCerts) {

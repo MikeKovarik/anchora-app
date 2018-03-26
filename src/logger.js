@@ -30,10 +30,9 @@ export class Logger {
 
 	@localStored
 	@observable
-	format = 'errors'
+	format = 'debug'
 
 	constructor() {
-
 		this.log = this.log.bind(this)
 		this.warn = this.warn.bind(this)
 		this.error = this.error.bind(this)

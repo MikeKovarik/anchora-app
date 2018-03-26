@@ -101,6 +101,7 @@ flexus-view[detail] {
 	background-color: #FFF;
 }
 	flexus-tabs {
+		white-space: nowrap;
 		align-self: flex-start;
 		font-weight: 500;
 		font-size: 17px;

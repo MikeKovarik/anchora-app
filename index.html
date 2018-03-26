@@ -56,6 +56,8 @@
 		// Technically. This isn't even a hack.
 		System.set('anchora', System.newModule(global.require('anchora')))
 
+		System.set('package.json', System.newModule(global.require('./package.json')))
+
 		var {promisify} = global.require('util')
 		var fsSync = global.require('fs')
 		var fs = {

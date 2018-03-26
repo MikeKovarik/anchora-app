@@ -21,7 +21,10 @@
 			</div>
 
 			<h5>Root</h5>
-			<input type="text" value.bind="server.root" ref="$root">
+			<input type="text"
+			value.bind="server.root"
+			keyup.trigger="resetRootInvalidity()"
+			ref="$root">
 
 			<h5>Protocols</h5>
 			<div fx-item small-space>
@@ -68,6 +71,7 @@
 
 		<flexus-tabs subtle>
 			<div>Settings</div>
+			<div>HTTP Config</div>
 			<!--div>Extensions</div-->
 			<!--div>Domains</div-->
 			<div>Log</div>
@@ -75,7 +79,8 @@
 		</flexus-tabs>
 
 		<flexus-pages>
-			<compose id="settings" view="./settings.html"></compose>
+			<compose id="settings" view="./settings-app.html"></compose>
+			<compose id="settings" view="./settings-http.html"></compose>
 			<!--compose id="settings" view="./settings-extensions.html"></compose-->
 			<!--compose view="./settings-hosts.html"></compose-->
 			<compose id="log" ref="$log" view="./log.html"></compose>

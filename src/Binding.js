@@ -22,19 +22,21 @@ function retrieveValue(storageName, defaultValue) {
 
 // decorator compatible with aurelia's binding system
 export function localStored(proto, name, descriptor) {
-	var {enumerable, initializer} = descriptor
 	var className = proto.constructor.name
 	var hiddenName = `_${name}`
 	var storageName = `${className}.${name}`
-	var defaultValue = initializer && initializer()
-	var value = retrieveValue(storageName, defaultValue)
 
+	var {enumerable} = descriptor
 	function rewriteDescriptor(instance) {
 		Object.defineProperty(instance, name, {enumerable, get, set})
 	}
 
 	function initGetter() {
-		this[hiddenName] = value
+		if (descriptor.initializer)
+			var defaultValue = descriptor.initializer()
+		else if (descriptor.get)
+			var defaultValue = descriptor.get.call(this)
+		this[hiddenName] = retrieveValue(storageName, defaultValue)
 		rewriteDescriptor(this)
 		return this[hiddenName]
 	}
