@@ -1,15 +1,8 @@
 // Experimental
 // Requires admin priviledges
-import fsSync from 'fs'
+import fs from 'fs'
 import cp from 'child_process'
 import {promisify} from 'util'
-var fs = {
-	readFile: promisify(fsSync.readFile),
-	writeFile: promisify(fsSync.writeFile),
-	stat: promisify(fsSync.stat),
-	createReadStream: fsSync.createReadStream,
-	createWriteStream: fsSync.createWriteStream,
-}
 var exec = (...args) => {
 	return new Promise((resolve, reject) => {
 		//cp.exec(...args, (err, )) // TODO
