@@ -1,5 +1,7 @@
 # Anchora App: HTTP/2.0 Static Server for Windows 10
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/MikeKovarik/anchora-app.svg)](https://greenkeeper.io/)
+
 👨‍💻 Localhost has never been sexier. Simple yet powerful static server app for Windows
 
 <p align="center">
