@@ -14,7 +14,7 @@
   },
   "main": "background.js",
   "dependencies": {
-    "anchora": "0.0.1",
+    "anchora": "1.1.1",
     "aurelia-bootstrapper": "^2.1.1",
     "flexus": "0.0.1",
     "systemjs": "0.20.13",
